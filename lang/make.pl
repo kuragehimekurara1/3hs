@@ -34,6 +34,11 @@ my @languages = qw(
 	moldovan
 	schinese
 	tchinese
+	neapolitan
+	macedonian
+	welsh
+	tagalog
+	catalan
 );
 
 # Strings never to put between quotes
@@ -63,9 +68,12 @@ my @preserve_keywords = qw(
 
 my $source_file = "";
 my $header_file = "";
+my $main_table = "";
 
 my $langs_w_missing = 0;
 my $total_missing = 0;
+
+my $func_ctr = 0;
 
 my @string_ids = qw();
 
@@ -73,6 +81,8 @@ sub parse_lang_file {
 	my ($lang_name) = @_;
 	open my $fh, "$lang_dir/$lang_name" or die "failed to open $lang_name file.";
 	my $is_reference_lang = @string_ids == 0;
+	my %functions_codegen;
+	my %functions;
 	my %strings;
 	my $line;
 
@@ -86,19 +96,45 @@ sub parse_lang_file {
 		chomp $line;
 		# Remove CR.......................
 		$line =~ s/\r//g;
-		if ($line =~ /^\s*#/) {
+		if ($line =~ /^\s*#[^#]/) {
 			next;
 		} elsif($line =~ /^- /) {
 			if($current_id eq "native_name") {
 				$native_name = $string_content;
 			} elsif($current_id) {
-				$strings{$current_id} = $string_content;
+				$current_id  =~ /([^ ]+)/i;
+				my $real_id  = $1;
+				if($current_id  =~ /(\+code\(.*\))/) {
+					my $code_bit = $1;
+					$functions{$real_id} = $string_content;
+					$code_bit =~ s/^\+code\(//;
+					$code_bit =~ s/\)$//;
+					my @params = split ", ", $code_bit;
+					my $genned_code = "";
+					for my $i (0..$#params) {
+						next if $params[$i] eq '_';
+						my $type = $params[$i];
+						my $i_2 = $i + 1;
+						if($type eq 'string') {
+							$genned_code .= "const std::string& p$i_2 = _params_vec[$i];\n";
+						} else {
+							if($type eq 'number') { $type = 'unsigned long long'; }
+							$genned_code .= "auto p$i_2 = unstring<$type>(_params_vec[$i]);\n";
+						}
+					}
+					chomp $genned_code;
+					$functions_codegen{$real_id} = $genned_code;
+				}
+				else {
+					$strings{$real_id} = $string_content;
+				}
 			}
 			$string_content = "";
 			$current_id = $line;
 			$current_id =~ s/^- //;
 		}
 		elsif($line =~ /[^\s]/) {
+			$line =~ s/#{2}/#/g;
 			$string_content and $string_content .= "\n";
 			$string_content .= $line;
 		}
@@ -111,6 +147,9 @@ sub parse_lang_file {
 	if($is_reference_lang) {
 		print "reference\n";
 		foreach my $k (sort keys %strings) {
+			push @string_ids, $k;
+		}
+		foreach my $k (sort keys %functions) {
 			push @string_ids, $k;
 		}
 	} else {
@@ -139,11 +178,12 @@ sub parse_lang_file {
 
 	my $missing = 0;
 
-	$source_file .= "\t[lang::$lang_name] =\n\t\t{\n";
+	$main_table .= "\t[lang::$lang_name] =\n\t\t{\n";
 	foreach my $k (@string_ids) {
 		my $string = $strings{$k};
+		my $function = $functions{$k};
 		if($string) {
-			$source_file .= "\t\t\t[str::$k] =";
+			$main_table .= "\t\t\t[str::$k] = { .string = ";
 
 			open my $lr, '<', \$string;
 			my $line;
@@ -154,16 +194,33 @@ sub parse_lang_file {
 				foreach my $kw (@preserve_keywords) {
 					$line =~ s/$kw/" $kw "/g;
 				}
-				$source_file .= $line;
+				$main_table .= $line;
 			}
-			$source_file .= ",\n";
+			$main_table .= ", .info = INFO_NONE },\n";
+		}
+		elsif($function) {
+			my $func_name = "_function_for_table_$func_ctr";
+			++$func_ctr;
+			$source_file .= <<EOF;
+/* string "$k" for language "$lang_name" ("$native_name") */
+static const char *$func_name(const std::vector<std::string>& _params_vec)
+{
+// generated code
+$functions_codegen{$k}
+// end generated code
+$function
+}
+
+EOF
+			$main_table .= "\t\t\t[str::$k] = { .function = $func_name, .info = INFO_ISFUNC },\n"
 		}
 		else {
-			$source_file .= "\t\t\tSTUB($k),\n";
+			$main_table .= "\t\t\tSTUB($k),\n";
+			# print "$k\n";
 			++$missing;
 		}
 	}
-	$source_file .= "\t\t},\n";
+	$main_table .= "\t\t},\n\n";
 
 	if(not $is_reference_lang) {
 		if($missing) {
@@ -183,6 +240,8 @@ $source_file .= <<EOF;
  * DO NOT EDIT */
 
 #include <ui/base.hh> /* for UI_GLYPH_* */
+#include <3ds/types.h>
+#include <vector>
 #include "./i18n_tab.hh"
 
 #ifndef HS_SITE_LOC
@@ -194,12 +253,25 @@ $source_file .= <<EOF;
 #endif
 
 #define STUB(id) [str::id] = lang_strtab[lang::english][str::id]
+#define RAW(lid, sid) &lang_strtab[lid][sid]
 
-// [str::xxx] is a GCC extension
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-static const char *lang_strtab[lang::_i_max][str::_i_max] =
-{
+template <typename T> T unstring(const std::string& s);
+template<> unsigned unstring(const std::string& s) { return strtoul(s.c_str(), NULL, 10); }
+template<> unsigned long unstring(const std::string& s) { return strtoul(s.c_str(), NULL, 10); }
+template<> unsigned long long unstring(const std::string& s) { return strtoull(s.c_str(), NULL, 10); }
+
+typedef const char *(*i18n_string_get_func)(const std::vector<std::string>&);
+typedef struct I18NStringStore {
+	union {
+		const char *string;
+		i18n_string_get_func function;
+	};
+	u8 info;
+} I18NStringStore;
+
+#define INFO_NONE   (0)
+#define INFO_ISFUNC (1 << 0)
+
 EOF
 
 $header_file .= <<EOF;
@@ -278,7 +350,14 @@ namespace i18n
 
 EOF
 
+chomp $main_table;
 $source_file .= <<EOF;
+// [str::xxx] is a GCC extension
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+static I18NStringStore lang_strtab[lang::_i_max][str::_i_max] =
+{
+$main_table
 };
 #pragma GCC diagnostic pop
 

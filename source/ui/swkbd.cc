@@ -46,7 +46,7 @@ void ui::AppletSwkbd::init_text(const std::string& t)
 void ui::AppletSwkbd::valid(SwkbdValidInput mode, u32 filterFlags, u32 maxDigits)
 { swkbdSetValidation(&this->state, mode, filterFlags, maxDigits); }
 
-bool ui::AppletSwkbd::render(const ui::Keys& keys)
+bool ui::AppletSwkbd::render(ui::Keys& keys)
 {
 	((void) keys);
 
@@ -78,6 +78,64 @@ void ui::AppletSwkbd::connect(ui::AppletSwkbd::connect_type t, SwkbdResult *r)
 {
 	panic_assert(t == ui::AppletSwkbd::result, "EINVAL");
 	this->resPtr = r;
+}
+
+/* KBDEnabledButton */
+
+void ui::KBDEnabledButton::setup(const std::string& default_label, const std::string& empty_label, const std::string& hint, size_t min_len)
+{
+	this->btn.setup(this->screen, default_label.size() ? default_label : empty_label);
+	this->min_len = min_len;
+	this->empty = empty_label;
+	this->hint = hint;
+	this->hasValue = !!default_label.size();
+	this->btn->connect(ui::Button::click, [this]() -> bool {
+		ui::RenderQueue::global()->render_and_then([this]() -> void {
+			SwkbdResult res;
+			SwkbdButton btn;
+
+			std::string query = ui::keyboard([this](ui::AppletSwkbd *swkbd) -> void {
+				swkbd->init_text(this->value());
+				swkbd->hint(this->hint);
+			}, &btn, &res);
+
+			if(btn != SWKBD_BUTTON_CONFIRM || res == SWKBD_INVALID_INPUT || res == SWKBD_OUTOFMEM || res == SWKBD_BANNED_INPUT)
+				return;
+
+			this->hasValue = query.size() && query.size() >= this->min_len;
+			if(this->hasValue)
+				this->btn->set_label(query);
+			else
+				this->btn->set_label(this->empty);
+
+			if(this->update_cb)
+				this->update_cb(this);
+		});
+		return true;
+	});
+	this->btn->resize(ui::screen_width(this->screen), 24.0f);
+}
+
+void ui::KBDEnabledButton::connect(connect_type t, update_callback_type cb)
+{
+	panic_assert(t == ui::KBDEnabledButton::on_update, "unexpected value for connect_type");
+	this->update_cb = cb;
+}
+
+void ui::KBDEnabledButton::set(const std::string& val)
+{
+	this->btn->set_label(val.size() ? val : this->empty);
+}
+
+const std::string& ui::KBDEnabledButton::value()
+{
+	static const std::string empty = "";
+	return this->hasValue ? this->btn->get_label() : empty;
+}
+
+bool ui::KBDEnabledButton::render(ui::Keys& keys)
+{
+	return this->btn->render(keys);
 }
 
 /* keyboard */

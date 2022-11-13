@@ -117,7 +117,7 @@ hShop ID
 
 - netcon_lost
 Конексюнеа с-а пиердут (%1).
-Се ренчаркэ ын $t seconds...
+Се ренчаркэ ын %2 seconds...
 
 - about_app
 Деспре
@@ -194,7 +194,7 @@ hShop ID
 оприт
 
 - patching_reboot
-Luma3DS Game Patching йесте акум порнит.
+Luma3DS game patching йесте акум порнит.
 Систеиул требуйе репорнит пентру ка ачястэ скимбаре сэ айбэ ефект.
 
 - reboot_now
@@ -324,11 +324,9 @@ Luma3DS Game Patching йесте акум порнит.
 Фолосиць ачест ID пентру а прими ажутор:
 %1
 
-- block
-блок
-
-- blocks
-блокурй
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 блок)";
+else       return "%1 (%2 блокурй)";
 
 - search_text
 Кэутаць дупэ текст
@@ -427,3 +425,26 @@ UI_GLYPH_DPAD_CLEAR/UI_GLYPH_CPAD: навигаць
 
 - themes
 Теме
+
+- delete_unused_tickets
+Штергець тикетеле нефолосите
+
+- found_unused_tickets
+%1 тикете нефолосите ау фост гъсите. Дориць съ ле штергець?
+
+- found_no_unused_tickets
+Ничун тикет нефолосит ну а фост гъсит.
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+Превйзуализаре ла темэ инвалидэ!
+
+- hint_add_queue
+UI_GLYPH_Y: адэугаць ла куадэ
+
+- hint_preview_theme
+UI_GLYPH_X: превйзуализаре темэ
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+Нуме алтернатив

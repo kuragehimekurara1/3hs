@@ -38,6 +38,13 @@
 	UI_SLOTS__2(__LINE__, name, __VA_ARGS__)
 #define UI_CTHEME_GETTER(symbol, id) \
 	static u32 symbol() { return *ui::Theme::global()->get_color(id); }
+#define UI_STATIC_SLOTS__3(line, objn, id, ...) \
+	static ui::slot_color_getter _static_slot_data__do_not_touch##line[] = { __VA_ARGS__ }; \
+	static const ui::StaticSlot objn = { _static_slot_data__do_not_touch##line, id, sizeof(_static_slot_data__do_not_touch##line) / sizeof(ui::slot_color_getter) };
+#define UI_STATIC_SLOTS__2(line, objn, id, ...) \
+	UI_STATIC_SLOTS__3(line, objn, id, __VA_ARGS__)
+#define UI_STATIC_SLOTS(objn, id, ...) \
+	UI_STATIC_SLOTS__2(__LINE__, objn, id, __VA_ARGS__)
 
 
 namespace ui
@@ -49,11 +56,13 @@ namespace ui
 		C2D_Image actual_image;
 		bool isOwn;
 	} ThemeDescriptorImage;
-	typedef u32 ThemeDescriptorColor;
+	typedef struct ThemeDescriptorColor {
+		u32 color;
+	} ThemeDescriptorColor;
 
 	namespace theme
 	{
-		enum _enum {
+		enum color_enum {
 			background_color,
 			text_color,
 			button_background_color,
@@ -71,7 +80,12 @@ namespace ui
 			smdh_icon_border_color,
 			checkbox_border_color,
 			checkbox_check_color,
+			graph_line_color,
+			warning_color,
+			cmax,
 			/* don't forget to update max_color when adding a color! */
+		};
+		enum image_enum {
 			more_image,
 			battery_image,
 			search_image,
@@ -80,19 +94,19 @@ namespace ui
 			random_image,
 			background_top_image,
 			background_bottom_image,
-			max,
+			imax,
 		};
-		constexpr u32 max_color = smdh_icon_border_color;
 	}
 
 	class Theme
 	{
 	public:
-		Theme() { memset(this->descriptors, 0, sizeof(this->descriptors)); }
-		constexpr ThemeDescriptorColor *get_color(u32 descriptor_id)
-		{ return &this->descriptors[descriptor_id].color; }
+		Theme() { this->clear(); }
+
+		constexpr u32 *get_color(u32 descriptor_id)
+		{ return &this->color_descriptors[descriptor_id].color; }
 		constexpr C2D_Image *get_image(u32 descriptor_id)
-		{ return &this->descriptors[descriptor_id].image.actual_image; }
+		{ return &this->image_descriptors[descriptor_id].actual_image; }
 
 		void cleanup() { this->cleanup_images(); }
 		/* clear all references & delete color data but don't free */
@@ -115,11 +129,12 @@ namespace ui
 		void replace_without_meta(ui::Theme& other);
 		void replace_with(ui::Theme& other);
 
+		bool operator == (const Theme& other)
+		{ return this->id == other.id; }
+
 	private:
-		union data_union {
-			ThemeDescriptorColor color;
-			ThemeDescriptorImage image;
-		} descriptors[theme::max];
+		ThemeDescriptorColor color_descriptors[theme::cmax];
+		ThemeDescriptorImage image_descriptors[theme::imax];
 		bool parse(std::function<bool(u8 *, u32)> read_data, size_t size, u8 flags);
 		void cleanup_images();
 
@@ -140,6 +155,12 @@ namespace ui
 		const u32 *colors;
 	};
 
+	struct StaticSlot
+	{
+		const slot_color_getter *getters;
+		const char *id;
+		size_t count;
+	};
 
 	class ThemeManager
 	{

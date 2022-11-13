@@ -35,7 +35,7 @@ namespace ctr
 		}
 
 		/* create a new thread */
-		thread(std::function<void(Ts...)> cb, Ts& ... args)
+		thread(std::function<void(Ts...)> cb, int prioAddition, Ts& ... args)
 		{
 			ThreadFuncParams *params = new ThreadFuncParams;
 			params->func = [&]() -> void { cb(args...); };
@@ -45,7 +45,7 @@ namespace ctr
 			svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
 
 			this->isFinished = false;
-			this->threadobj = threadCreate(&thread::_entrypoint, params, 64 * 1024, prio - 1,
+			this->threadobj = threadCreate(&thread::_entrypoint, params, 64 * 1024, prio + prioAddition,
 				-2, false);
 			panic_assert(this->threadobj != nullptr, "failed to create thread");
 		}
@@ -99,7 +99,7 @@ namespace ctr
 		thread<Ts...> *run(std::function<void(Ts...)> cb, Ts& ... args)
 		{
 			this->cleanup();
-			return this->th = new thread<Ts...>(cb, args...);
+			return this->th = new thread<Ts...>(cb, -1, args...);
 		}
 
 		/* returns the current active thread, and nullptr if there is none */

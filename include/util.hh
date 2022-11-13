@@ -20,13 +20,35 @@
 #include <ui/base.hh>
 #include <string>
 
+class StatusLine : public ui::BaseWidget
+{ UI_WIDGET("StatusLine")
+public:
+	void run(const std::string& str);
+	void reset();
+
+	bool render(ui::Keys&) override;
+	float height() override { return 0.0f; }
+	float width() override { return 0.0f; }
+
+private:
+	ui::ScopedWidget<ui::Text> text;
+	time_t in_pos_start;
+	float xpos, lastx;
+	int flags;
+
+};
+
 
 /* returns if we were previously focussed */
 bool set_focus(bool focus);
+/* set the status line */
+void set_status(const std::string& text);
+void reset_status();
 /* sets the action description and returns the old one */
 std::string set_desc(const std::string& nlabel);
 void lower(std::string& s);
 void trim(std::string& str, const std::string& whitespace);
 void join(std::string& ret, const std::vector<std::string>& tokens, const std::string& sep);
+
 #endif
 

@@ -85,7 +85,7 @@ float ui::SMDHIcon::height()
 	return this->params.pos.h;
 }
 
-bool ui::SMDHIcon::render(const ui::Keys& keys)
+bool ui::SMDHIcon::render(ui::Keys& keys)
 {
 	((void) keys);
 	if(this->drawBorder)

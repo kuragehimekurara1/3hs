@@ -117,7 +117,7 @@ Tytuł nie istnieje: %1
 
 - netcon_lost
 Utracono połączenie sieciowe (%1).
-Ponowna próba za $t sekund...
+Ponowna próba za %2 sekund...
 
 - about_app
 Dokumentacja
@@ -324,11 +324,9 @@ Wartość od 0 do 255
 Użyj tego identyfikatora, aby uzyskać pomoc:
 %1
 
-- block
-Blok
-
-- blocks
-Bloki
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 blok)";
+else       return "%1 (%2 bloki)";
 
 - search_text
 Szukaj według tekstu
@@ -414,21 +412,73 @@ Włącz wskaźniki stanu LED
 - allow_led_desc
 Spowoduje to miganie diody LED, aby poinformować Cię o różnych zmianach stanu, na przykład po zakończeniu instalacji tytułu
 
-# don't translate "Enable developer UNITINFO", ENVINFO may be translated as configuration, retail may be translated as normal, unit may be translated as variant
-# If you've already translated this string you don't have to again
 - dev_unitinfo
 Według ENVINFO tej konsoli to jest jednostka programistyczna.
 3hs nie będzie działać poprawnie w tym systemie.
 Jeśli masz detaliczną wersję 3DS, upewnij się, że opcja „Włącz programistę UNITINFO” w konfiguracji Luma3DS jest wyłączona.
 
-# nowrap, used in for examples language select
 - hint_navigate
 UI_GLYPH_DPAD_CLEAR/UI_GLYPH_CPAD: nawigować
 
-# %1 = theme author
 - made_by
 przez %1
 
-# nowrap, burger menu item
 - themes
 motyw
+
+- delete_unused_tickets
+Usuń niewykorzystane bilety?
+
+- found_unused_tickets
+Znaleziono %1 niewykorzystanych biletów. Czy chcesz je usunąć?
+
+- found_no_unused_tickets
+Nie znaleziono niewykorzystanych biletów.
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+Otrzymano niewłaściwy podgląd motywu od serwera!
+
+- hint_add_queue
+UI_GLYPH_Y: dodaj do kolejki
+
+- hint_preview_theme
+UI_GLYPH_X: podgląd motywu
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+Alternatywna nazwa
+
+# setting title
+- show_alt
+Pokaż alternatywną nazwę
+
+# setting description
+- show_alt_desc
+Pokaż alternatywne nazwy, jeśli to możliwe.
+
+# setting title
+- default_reinst
+Domyślna ponowna instalacja
+
+# setting description
+- default_reinst_desc
+Domyślnie reinstaluj ponownie; nie pytaj o usunięcie już zainstalowanego tytułu.
+
+# shown while installing a queue on the other screen
+#  %1 = current game title
+#  %2 = total titles
+#  %3 = current position in the queue
+- installing_game_x_of_y
+Przetwarzanie kolejki: %2/%3
+%1
+
+- no_other_params_prod
+Nie można określić innych parametrów podczas szukania wg kodu produktu
+
+- invalid_prod
+Niewłaściwy kod produktu
+
+- search_prod
+Szukaj według kodu produktu
+

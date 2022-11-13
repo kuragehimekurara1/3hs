@@ -31,17 +31,26 @@ namespace ui
 		using callback_t = std::function<bool()>;
 
 		void setup();
-		bool render(const ui::Keys&) override;
+		bool render(ui::Keys&) override;
 		float height() override;
 		float width() override;
 
-		enum connect_type { add, on_select, on_move };
+		enum connect_type { add, on_select, on_move, set_key_mask };
 		void connect(connect_type, const std::string&, callback_t);
 		void connect(connect_type, callback_t);
+		void connect(connect_type, u32);
+
+		void select(size_t pos, u32 pressed_keys);
 
 		void add_row(const std::string& label, callback_t callback);
 		void add_row(const std::string& label);
+		void clear();
 
+		void set_pos(u32 i)
+		{
+			this->select(i, KEY_A);
+		}
+		u32 kdown_for_press() { return this->kdown; }
 		u32 pos() { return this->i; }
 
 
@@ -55,6 +64,7 @@ namespace ui
 		callback_t main_callback = nullptr;
 		std::vector<ui::Button *> btns;
 		std::vector<callback_t> funcs;
+		u32 kdownmask = KEY_A, kdown;
 		float w, h;
 		u32 i = 0;
 

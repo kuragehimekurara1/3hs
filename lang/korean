@@ -117,7 +117,7 @@ unknown
 
 - netcon_lost
 네트워크 연결 실패 (%1).
- $t 초 후 재시도...
+ %2 초 후 재시도...
 
 - about_app
 정보
@@ -194,7 +194,7 @@ LumaLocale 모드
 꺼짐
 
 - patching_reboot
-Luma3DS Game Patching이 활성화되었습니다.
+Luma3DS game patching이 활성화되었습니다.
 시스템을 재시작해야 적용이 됩니다.
 
 - reboot_now
@@ -324,11 +324,8 @@ LumaLocale autosetter 모드 설정. 자동은 자동으로 언어를 선택합�
 민원하실때 이 ID를 사용하세요:
 %1
 
-- block
-블록
-
-- blocks
-블록
+- size_plus_block
+%1 (%2 블록)
 
 - search_text
 이름으로 검색
@@ -426,4 +423,26 @@ UI_GLYPH_DPAD_CLEAR/UI_GLYPH_CPAD: 검색
 
 - themes
 테마
+
+- delete_unused_tickets
+미사용 티켓 삭제
+
+- found_unused_tickets
+미사용 티켓 %개를 삭제하시겠습니까?
+
+- found_no_unused_tickets
+발견된 미사용 티켓 없음
+
+- invalid_theme_preview
+다운로드된 테마 미리보기 표시 불가
+
+- hint_add_queue
+UI_GLYPH_Y: 다운로드 대기열에 추가
+
+- hint_preview_theme
+UI_GLYPH_X: 테마 미리보기
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+대체 이름
 

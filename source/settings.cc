@@ -40,10 +40,21 @@
 #define THEMES_DIR        "/3ds/3hs/themes/"
 #define SPECIAL_LIGHT     "special:light"
 #define SPECIAL_DARK      "special:dark"
+#define SPECIAL_PREFIX    "special:"
 #define THEMES_EXT        ".hstx"
+
+enum migrations {
+	migration_initial           = 0,
+	/* why is the value of 1 missing ...? */
+	migration_default_reinstall = 2,
+	migration_latency_graph     = 3,
+	migration_goto_region       = 4,
+};
+#define LATEST_MIGRATION migration_goto_region
 
 static std::vector<ui::Theme> g_avail_themes;
 static NewSettings g_nsettings;
+static ui::Theme *light_theme;
 static bool g_loaded = false;
 
 NewSettings *get_nsettings()
@@ -61,7 +72,8 @@ static void write_settings()
 	* (u64 *) &header[0x04] = g_nsettings.flags0;
 	header[0x0C] = g_nsettings.lang;
 	header[0x0D] = g_nsettings.max_elogs;
-	memset(&header[0xE], 0, sizeof(u32) * 4);
+	header[0x0E] = g_nsettings.migration;
+	memset(&header[0xF], 0, sizeof(u32) * 3 + sizeof(u8) * 3);
 	* (u16 *) &header[0x1E] = (u16) g_nsettings.theme_path.size();
 
 	panic_assert(fwrite(header, sizeof(header), 1, f) == 1, "failed to write to settings");
@@ -168,14 +180,30 @@ void reset_settings(bool set_default_lang)
 	                   | ((u64) SortDirection::ascending  << SORTDIRECTION_SHIFT)
 	                   | ((u64) SortMethod::alpha         << SORTMETHOD_SHIFT)
 	                   | FLAG0_SEARCH_ECONTENT            | FLAG0_WARN_NO_BASE
-	                   | FLAG0_ALLOW_LED;
+	                   | FLAG0_ALLOW_LED                  | FLAG0_DEFAULT_REINSTALL;
 
 	g_nsettings.max_elogs = 3;
 	g_nsettings.theme_path = SPECIAL_LIGHT;
 	g_nsettings.proxy_port = 0; /* disable proxy by default */
+	g_nsettings.migration = LATEST_MIGRATION;
 
 	write_settings();
 	g_loaded = true;
+}
+
+static void apply_migrations()
+{
+	if(g_nsettings.migration == LATEST_MIGRATION)
+		return; /* nothing to do; this is an optimization as it's likely to already be at the latest */
+	if(g_nsettings.migration < migration_default_reinstall)
+		g_nsettings.flags0 |= FLAG0_DEFAULT_REINSTALL;
+	if(g_nsettings.migration < migration_latency_graph)
+		{ } /* this one is just here as a courtesy */
+	if(g_nsettings.migration < migration_goto_region)
+		g_nsettings.flags0 |= FLAG0_GOTO_REGION;
+	/* in the future more migrations may be written here */
+	g_nsettings.migration = LATEST_MIGRATION;
+	write_settings();
 }
 
 /* returns false on failure */
@@ -229,6 +257,8 @@ bitfield flags0_b : u64 {
 	FLAG0_ECONTENT
 	FLAG0_BASE_WARN
 	FLAG0_LED
+	FLAG0_DEFAULT_REINSTALL
+	FLAG0_ALT_NAME
 }
 
 struct dynstr {
@@ -241,7 +271,9 @@ struct ths_settings {
 	flags0_b flags0
 	lang_e lang
 	u8 elogs
-	u32[4] reserved1
+	u8 migration_num
+	u8[3] reserved2
+	u32[3] reserved1
 	dynstr theme_path
 	u16 proxy_port
 	dynstr proxy_host     // if proxy_port != 0
@@ -282,6 +314,7 @@ void ensure_settings()
 	g_nsettings.lang = buf[0x0C];
 	/* TODO: Check validity of lang */
 	g_nsettings.max_elogs = buf[0x0D];
+	g_nsettings.migration = buf[0x0E];
 	/* start parsing strings */
 	offset = 0x1E;
 	if(!parse_string(g_nsettings.theme_path, buf, offset, size)) goto default_settings;
@@ -294,6 +327,8 @@ void ensure_settings()
 		if(!parse_string(g_nsettings.proxy_username, buf, offset, size)) goto default_settings;
 		if(!parse_string(g_nsettings.proxy_password, buf, offset, size)) goto default_settings;
 	}
+
+	apply_migrations();
 
 	goto out;
 default_settings:
@@ -323,6 +358,10 @@ enum SettingsId
 	ID_Extra,      // bool
 	ID_WarnNoBase, // bool
 	ID_AllowLED,   // bool
+	ID_Reinstall,  // bool
+	ID_ShowAlt,    // bool
+	ID_DisGraph,   // bool
+	ID_GotoRegion, // bool
 	ID_TimeFmt,    // show as text: enum val
 	ID_ProgLoc,    // show as text: enum val
 	ID_Language,   // show as text: enum val
@@ -425,6 +464,14 @@ static bool serialize_id_bool(SettingsId ID)
 		return ISET_WARN_NO_BASE;
 	case ID_AllowLED:
 		return ISET_ALLOW_LED;
+	case ID_Reinstall:
+		return ISET_DEFAULT_REINSTALL;
+	case ID_ShowAlt:
+		return ISET_SHOW_ALT;
+	case ID_DisGraph:
+		return ISET_DISABLE_GRAPH;
+	case ID_GotoRegion:
+		return ISET_GOTO_REGION;
 	case ID_TimeFmt:
 	case ID_ProgLoc:
 	case ID_Language:
@@ -449,6 +496,10 @@ static std::string serialize_id_text(SettingsId ID)
 	case ID_Extra:
 	case ID_WarnNoBase:
 	case ID_AllowLED:
+	case ID_Reinstall:
+	case ID_ShowAlt:
+	case ID_DisGraph:
+	case ID_GotoRegion:
 		panic("impossible text setting switch case reached");
 	case ID_TimeFmt:
 		return ISET_BAD_TIME_FORMAT ? STRING(fmt_12h) : STRING(fmt_24h);
@@ -687,6 +738,18 @@ static void update_settings_ID(SettingsId ID)
 	case ID_AllowLED:
 		g_nsettings.flags0 ^= FLAG0_ALLOW_LED;
 		break;
+	case ID_Reinstall:
+		g_nsettings.flags0 ^= FLAG0_DEFAULT_REINSTALL;
+		break;
+	case ID_ShowAlt:
+		g_nsettings.flags0 ^= FLAG0_SHOW_ALT;
+		break;
+	case ID_DisGraph:
+		g_nsettings.flags0 ^= FLAG0_DISABLE_GRAPH;
+		break;
+	case ID_GotoRegion:
+		g_nsettings.flags0 ^= FLAG0_GOTO_REGION;
+		break;
 	// Enums
 	case ID_TimeFmt:
 	{
@@ -789,14 +852,15 @@ void log_settings()
 		"defaultSortMethod: %s, "
 		"defaultSortDirection: %s, "
 		"proxyEnabled: %s, "
-		"themePath: %s",
+		"themePath: %s, "
+		"disableGraph: %s",
 			BOOL(ISET_RESUME_DOWNLOADS), BOOL(ISET_LOAD_FREE_SPACE),
 			BOOL(ISET_SHOW_BATTERY), BOOL(ISET_SHOW_NET), BOOL(ISET_BAD_TIME_FORMAT),
 			ISET_PROGBAR_TOP ? "top" : "bottom",
 			i18n::langname(g_nsettings.lang), localemode2str_en(SETTING_LUMALOCALE),
 			BOOL(ISET_SEARCH_ECONTENT), BOOL(ISET_WARN_NO_BASE), g_nsettings.max_elogs,
 			method2str_en(SETTING_DEFAULT_SORTMETHOD), direction2str_en(SETTING_DEFAULT_SORTDIRECTION),
-			BOOL(g_nsettings.proxy_port != 0), g_nsettings.theme_path.c_str());
+			BOOL(g_nsettings.proxy_port != 0), g_nsettings.theme_path.c_str(), BOOL(ISET_DISABLE_GRAPH));
 #undef BOOL
 }
 
@@ -825,10 +889,14 @@ void show_settings()
 		{ STRING(check_extra)    , STRING(check_extra_desc)    , ID_Extra      , false },
 		{ STRING(warn_no_base)   , STRING(warn_no_base_desc)   , ID_WarnNoBase , false },
 		{ STRING(allow_led)      , STRING(allow_led_desc)      , ID_AllowLED   , false },
+		{ STRING(default_reinst) , STRING(default_reinst_desc) , ID_Reinstall  , false },
+		{ STRING(show_alt)       , STRING(show_alt_desc)       , ID_ShowAlt    , false },
+		{ STRING(disable_graph)  , STRING(disable_graph_desc)  , ID_DisGraph   , false },
+		{ STRING(goto_region)    , STRING(goto_region_desc)    , ID_GotoRegion , false },
 		{ STRING(time_format)    , STRING(time_format_desc)    , ID_TimeFmt    , true  },
 		{ STRING(progbar_screen) , STRING(progbar_screen_desc) , ID_ProgLoc    , true  },
 		{ STRING(language)       , STRING(language_desc)       , ID_Language   , true  },
-		{ STRING(lumalocalemode) , STRING(lumalocalemode)      , ID_Localemode , true  },
+		{ STRING(lumalocalemode) , STRING(lumalocalemode_desc) , ID_Localemode , true  },
 		{ STRING(proxy)          , STRING(proxy_desc)          , ID_Proxy      , true  },
 		{ STRING(max_elogs)      , STRING(max_elogs_desc)      , ID_MaxELogs   , true  },
 		{ STRING(def_sort_meth)  , STRING(def_sort_meth_desc)  , ID_Method     , true  },
@@ -920,56 +988,58 @@ void show_settings()
 void load_current_theme()
 {
 	ui::Theme cthem;
-	if(g_nsettings.theme_path == SPECIAL_DARK)
-	{
-		cthem.open(dark_hstx, dark_hstx_size, SPECIAL_DARK, nullptr);
-	}
-	else
-	{
-		cthem.open(light_hstx, light_hstx_size, SPECIAL_LIGHT, nullptr);
-		if(g_nsettings.theme_path != SPECIAL_LIGHT)
-		{
-			/* it's fine if this fails, we'll just take special:light in that case */
-			cthem.open(g_nsettings.theme_path.c_str(), &cthem);
-		}
-	}
+
+	int isDefaultLight = g_nsettings.theme_path == SPECIAL_LIGHT;
+	static const struct {
+		const char *name;
+		const u8 *data;
+		u32 size;
+	} sets[] = {
+		{ .name = SPECIAL_LIGHT, .data = light_hstx, .size = light_hstx_size },
+		{ .name = SPECIAL_DARK, .data = dark_hstx, .size = dark_hstx_size },
+	};
+
+	panic_assert(cthem.open(sets[1 - isDefaultLight].data, sets[1 - isDefaultLight].size, sets[1 - isDefaultLight].name, nullptr), "failed to parse built-in theme");
 	g_avail_themes.push_back(cthem);
+	if(!isDefaultLight)
+		light_theme = &g_avail_themes.back();
 	cthem.clear();
+
+	panic_assert(cthem.open(sets[isDefaultLight].data, sets[isDefaultLight].size, sets[isDefaultLight].name, nullptr), "failed to parse built-in theme");
+	g_avail_themes.push_back(cthem);
+	if(isDefaultLight)
+		light_theme = &g_avail_themes.back();
+	cthem.clear();
+
+	if(strncmp(g_nsettings.theme_path.c_str(), SPECIAL_PREFIX, sizeof(SPECIAL_PREFIX) - 1) != 0)
+	{
+		/* it's fine if this fails, we'll just take special:light in that case */
+		cthem.open(g_nsettings.theme_path.c_str(), light_theme);
+		g_avail_themes.push_back(cthem);
+	}
 }
 
 static void load_themes()
 {
 	ui::Theme cthem;
-	if(ui::Theme::global()->id != SPECIAL_LIGHT)
-	{
-		panic_assert(cthem.open(light_hstx, light_hstx_size, SPECIAL_LIGHT, nullptr), "failed to parse built-in theme");
-		g_avail_themes.push_back(cthem);
-		cthem.clear();
-	}
-	if(ui::Theme::global()->id != SPECIAL_DARK)
-	{
-		panic_assert(cthem.open(dark_hstx, dark_hstx_size, SPECIAL_DARK, nullptr), "failed to parse built-in theme");
-		g_avail_themes.push_back(cthem);
-	}
 
 	DIR *d = opendir(THEMES_DIR);
 	/* not having a themes directory is fine as well */
 	if(d)
 	{
 		struct dirent *ent;
-		constexpr size_t dirname_len = strlen(THEMES_DIR);
+		constexpr size_t dirname_len = sizeof(THEMES_DIR) - 1;
 		char fname[dirname_len + sizeof(ent->d_name)] = THEMES_DIR;
 		while((ent = readdir(d)))
 		{
 			if(ent->d_type != DT_REG) continue;
 			strcpy(fname + dirname_len, ent->d_name);
 			cthem.clear();
-			if(ui::Theme::global()->id != fname && cthem.open(fname, &g_avail_themes.front()))
+			if(ui::Theme::global()->id != fname && cthem.open(fname, light_theme))
 				g_avail_themes.push_back(cthem);
 		}
 		closedir(d);
 	}
-	cthem.clear();
 }
 
 
@@ -1015,6 +1085,8 @@ void show_theme_menu()
 
 	for(ui::Theme& theme : g_avail_themes)
 		ms->add_row(theme.name);
+	auto it = std::find(g_avail_themes.begin(), g_avail_themes.end(), *ui::Theme::global());
+	ms->set_pos(std::distance(g_avail_themes.begin(), it));
 
 	queue.render_finite_button(KEY_B);
 	set_focus(focus);

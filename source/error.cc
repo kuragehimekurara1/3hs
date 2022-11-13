@@ -149,6 +149,9 @@ static const std::unordered_map<Result, std::unordered_map<Result, const char *>
 			{ 9 , "API failed to process request"                 },
 			{ 10, "Log was too large to upload"                   },
 			{ 11, "Failed to install file forwarder"              },
+			{ 12, "Title is not listed"                           },
+			{ 13, "Out of memory"                                 },
+			{ 14, "Incompatible font"                             },
 		}
 	},
 });

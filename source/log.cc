@@ -102,7 +102,7 @@ static void write_string(const char *s)
 		{ \
 			if(strncmp(ent->d_name, "3hs.log", sizeof("3hs.log") - 1) == 0) \
 			{ \
-				static char path[256+sizeof("/3ds/3hs/")] = "/3ds/3hs/"; \
+				static char path[sizeof(ent->d_name)+sizeof("/3ds/3hs/")] = "/3ds/3hs/"; \
 				strcpy(path + sizeof("/3ds/3hs/") - 1, ent->d_name); \
 				__VA_ARGS__ \
 			} \
@@ -169,7 +169,7 @@ void log_flush()
 #endif
 }
 
-void _logf(const char *fnname, const char *filen,
+extern "C" void _logf(const char *fnname, const char *filen,
 	size_t line, LogLevel lvl, const char *fmt, ...)
 {
 //	if(lvl > MAX_LVL)

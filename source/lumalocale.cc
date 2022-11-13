@@ -29,6 +29,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+extern bool ns_was_init;
+
 
 static bool has_region(ctr::TitleSMDH *smdh, ctr::Region region)
 {
@@ -123,16 +125,13 @@ static void write_file(u64 tid, const char *region, const char *lang)
 	if(access(path.c_str(), F_OK) == 0)
 		return;
 
-	std::string contents = std::string(region) + " " + std::string(lang);
-
 	FILE *file = fopen(path.c_str(), "w");
 	if(file == nullptr) return;
-
-	fwrite(contents.c_str(), 1, contents.size(), file);
+	fprintf(file, "%s %s", region, lang);
 	fclose(file);
 }
 
-static bool enable_gamepatching_buf(u8 *buf)
+static bool enable_gamepatching_buf_legacy(u8 *buf)
 {
 	// Luma3DS config format
 	// byte 0-3 : "CONF"
@@ -153,55 +152,122 @@ static bool enable_gamepatching_buf(u8 *buf)
 	return ret;
 }
 
-/* returns if gamepatching was set before */
-static bool enable_gamepatching()
+/* returns if a reboot is required */
+static bool enable_gamepatching_legacy()
 {
 	FILE *config = fopen("/luma/config.bin", "r");
-	if(config == nullptr) return true;
+	if(config == nullptr) return false;
 
-	u8 buf[32];
-	if(fread(buf, 1, 32, config) != 32)
-	{ fclose(config); return true; }
+	u8 buf[33];
+	/* if the file is not the correct size abort */
+	if(fread(buf, 1, 33, config) != 32)
+	{ fclose(config); return false; }
 
 	fclose(config);
 	vlog("checking if gamepatching is enabled");
-	bool isSet = enable_gamepatching_buf(buf);
+	bool isSet = enable_gamepatching_buf_legacy(buf);
 	vlog("isSet: %i", isSet);
-	if(isSet) return true;
+	if(isSet) return false;
 
 	// We need to update settings
 	config = fopen("/luma/config.bin", "w");
 	if(config == nullptr) return true;
 
 	if(fwrite(buf, 1, 32, config) != 32)
-	{ fclose(config); return true; }
+	{ fclose(config); return false; }
+
+	ilog("successfully enabled game patching.");
 
 	fclose(config);
+	return true;
+}
+
+static int enable_gamepatching_new_f(FILE *config)
+{
+	/* Don't waste time properly parsing ini file.  Instead, search for the
+	 * setting with simple string comparisons.  This won't cover edge cases
+	 * where the user has changed the file manually and added or removed
+	 * some whitespace, but in this situation it would be reasonable to
+	 * assume that they know what they are doing and can manage on their
+	 * own. */
+	char buf[64];
+	static constexpr const char search_str[] = "enable_game_patching = ";
+	static constexpr const size_t search_str_len = sizeof(search_str) - 1;
+
+	while(fgets(buf, sizeof(buf), config) != nullptr)
+	{
+		bool line_too_long = false;
+		size_t len;
+		while((len = strlen(buf)) == sizeof(buf) - 1 && buf[sizeof(buf) - 2] != '\n')
+		{
+			line_too_long = true;
+			if(fgets(buf, sizeof(buf), config) == nullptr)
+				return 0;
+		}
+		if(line_too_long) continue;
+
+		if(len == search_str_len + 2 && memcmp(buf, search_str, search_str_len) == 0)
+		{
+			if(buf[search_str_len] == '0')
+			{
+				if(fseek(config, -2, SEEK_CUR) != 0) return -1;
+				if(fputc('1', config) == EOF) return -1;
+				ilog("game patching successfully enabled");
+				return 1;
+			}
+			else if(buf[search_str_len] == '1')
+			{
+				vlog("game patching is already enabled");
+				return 0;
+			}
+		}
+	}
+
+	vlog("could not determine if game patching is enabled");
 	return false;
+}
+
+static bool enable_gamepatching_new()
+{
+	FILE *f = fopen("/luma/config.ini", "r+");
+	if(!f) return false;
+	int res = enable_gamepatching_new_f(f);
+	fclose(f);
+	if(res == -1)
+		vlog("I/O error while trying to write /luma/config.ini");
+	return res == 1;
+}
+
+/* returns if a reboot is required */
+static bool enable_gamepatching()
+{
+	bool ret = false;
+	if(access("/luma/config.bin", R_OK | W_OK) == 0)
+		ret |= enable_gamepatching_legacy();
+	if(access("/luma/config.ini", R_OK | W_OK) == 0)
+		ret |= enable_gamepatching_new();
+	return ret;
 }
 
 void luma::maybe_set_gamepatching()
 {
-	/* disabled due to luma v11.0, may be re-implemented for config.ini at some point. */
-	return;
-
 	if(SETTING_LUMALOCALE == LumaLocaleMode::disabled)
 		return;
 
 	// We should prompt for reboot...
-	if(!enable_gamepatching())
+	if(enable_gamepatching())
 	{
-		ilog("enabled game patching");
-		if(ui::Confirm::exec(STRING(reboot_now), STRING(patching_reboot)))
-			NS_RebootSystem();
+		if(ns_was_init)
+			if(ui::Confirm::exec(STRING(reboot_now), STRING(patching_reboot)))
+				NS_RebootSystem();
 	}
 }
 
-bool luma::set_locale(u64 tid)
+bool luma::set_locale(u64 tid, bool interactive)
 {
 	// we don't want to set a locale
 	LumaLocaleMode mode = SETTING_LUMALOCALE;
-	if(mode == LumaLocaleMode::disabled)
+	if(mode == LumaLocaleMode::disabled || (!interactive && mode == LumaLocaleMode::manual))
 		return false;
 
 	ctr::TitleSMDH *smdh = ctr::smdh::get(tid);
@@ -209,19 +275,16 @@ bool luma::set_locale(u64 tid)
 	const char *langstr = nullptr;
 	const char *regstr = nullptr;
 
-	if(smdh == nullptr) return false;
+	if(smdh == nullptr)
+		return false;
 	bool ret = false;
 
 	// We don't need to do anything
 	if(smdh->region == (u32) ctr::RegionLockout::WORLD)
 		goto del_smdh;
 
-	u8 sysregion;
-	if(R_FAILED(CFGU_SecureInfoGetRegion(&sysregion)))
-		goto del_smdh;
-
 	// Convert to Region
-	switch(sysregion)
+	switch(ctr::get_system_region())
 	{
 		case CFG_REGION_AUS: case CFG_REGION_EUR: region = ctr::Region::EUR; break;
 		case CFG_REGION_CHN: region = ctr::Region::CHN; break;

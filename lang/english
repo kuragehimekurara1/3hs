@@ -7,11 +7,13 @@
 #  - If you require context for anything else feel free to ask
 #  - %<n> where <n> is a number from 1-9 is a variable, their meaning is explained in the matching comment
 #  - The value of the variable will literally be substituted (replaced)
-#  - if this doesn't work in your language ask in the hShop discord channel so i can write a workaround for you
+#  - if this doesn't work in your language you may have to write a bit of code to work around it
+#    - please take a look at the example string in english "size_plus_block"
+#    - if you need help feel free to ask
 # UI_GLYPH_ is a prefix for buttons in the system fonts i.e. UI_GLYPH_B is the B button on your 3DS
 #  - They should be kept exactly as-is, they should be encircled by spaces
 #    - Even if your language has no such things, not having a space causes ugly clamping
-# PAGE_* are URLs to hShop pages
+# PAGE_ is a prefix for a URL to a hShop page
 #  - They should be kept exactly as-is, the actual URL gets placed in place of the PAGE_ letters
 # Preserve newlines ("enter"s), they are added for stylistic purposes, most things should neatly wrap
 # Although text wraps in most cases, it's for the best not make your translation too verbose
@@ -25,6 +27,7 @@
 #    - Strings that scroll obviously can't wrap
 # If your language is officially supported by Nintendo, use their translations for their terms
 #   - For example, "blocks", "HOME menu", "theme"
+#
 #
 # Any questions and new translations can be posted in the hShop discord channel
 
@@ -182,10 +185,14 @@ invalid
 Title doesn't exist: %1
 
 # %1 = error code
-# $t = seconds remaining
-- netcon_lost
+# %2 = seconds remaining, range: 1-10 inclusive
+- netcon_lost +code(_, number)
+/* the string is:
 Network connection lost (%1).
-Retrying in $t seconds...
+Retrying in %2 second(s)...
+*/
+if(p2 < 2) return "Network connection lost (%1).\nRetrying in %2 seconds...";
+else       return "Network connection lost (%1).\nRetrying in %2 second...";
 
 # nowrap, burger (three lines) menu entry
 - about_app
@@ -288,7 +295,7 @@ manual
 disabled
 
 - patching_reboot
-Luma3DS Game Patching is now enabled.
+Luma3DS game patching is now enabled.
 The system must be restarted for this change to take effect.
 
 - reboot_now
@@ -332,13 +339,13 @@ Current 3hs version %1 is lower than the required version %2
 - proxy
 Proxy
 
-# used for "no proxy is set"
+# used for "no proxy is set", "no default playlist is set"
 - none
 (none)
 
 # view proxy settings
 - press_a_to_view
-Click UI_GLYPH_A to view.
+Press UI_GLYPH_A to view.
 
 # proxy host
 - host
@@ -381,6 +388,7 @@ Toggle the free space indicator.
 Toggle the battery level indicator.
 
 # setting description
+#  you can append something like "in <your country> <your time format> is used most often", that is, if your language is predominantly spoken in one country and there exists a consensus there
 - time_format_desc
 Select the time format.
 
@@ -390,7 +398,7 @@ Set the language for 3hs. The application must be restarted for the selected lan
 
 # setting description
 - lumalocalemode_desc
-Set the mode of the LumaLocale autosetter. Automatic selects a language automatically. If this is set to manual, 3hs will prompt for a region after the installation of content.
+Set the operating mode for locale emulation setup. "Automatic" will automatically configure the language. "Manual" will make 3hs ask you to choose the language after content installation.
 
 # setting description
 - check_extra_desc
@@ -455,12 +463,11 @@ Use this ID to get support:
 %1
 
 # Nintendo blocks, use official Nintendo translation if available
-- block
-block
-
-# see above, just in plural this time
-- blocks
-blocks
+#  %1 = size in bytes/KiB/MiB/GiB/TiB
+#  %2 = amount of blocks
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 block)";
+else       return "%1 (%2 blocks)";
 
 # nowrap, search menu item
 - search_text
@@ -476,7 +483,7 @@ Search by Title ID
 
 # invalid title id specified during legacy search
 - invalid_tid
-Invalid Title ID
+Invalid title ID
 
 - theme_installer_tid_bad
 Please browse the Themes category manually to look for themes
@@ -486,7 +493,7 @@ Please browse the Themes category manually to look for themes
 Enter a legacy search query
 
 - no_other_params_tid
-Cannot specify any other parameters when specifying a Title ID
+Cannot specify any other parameters when specifying a title ID
 
 - both_sd_and_sb
 You must specify a sort method and a sort direction when sorting search results
@@ -587,4 +594,193 @@ by %1
 # nowrap, burger menu item
 - themes
 Themes
+
+# nowrap, burger menu item
+- delete_unused_tickets
+Delete unused tickets
+
+# asking user if they want to delete unused tickets, %1 = amount of unused tickets that were found
+- found_unused_tickets
+Found %1 unused tickets. Do you want to remove them?
+
+# informing user that no missing tickets were found
+- found_no_unused_tickets
+No unused tickets were found.
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+Invalid theme preview fetched from server!
+
+# hinting the user to press Y to add to queue in extmeta
+- hint_add_queue
+UI_GLYPH_Y: add to queue
+
+# hinting the user to press X to preview theme in extmeta if category is themes
+- hint_preview_theme
+UI_GLYPH_X: preview theme
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+Alternative name
+
+# setting title
+- show_alt
+Show alternative name
+
+# setting description
+- show_alt_desc
+Show alternative names, if available.
+
+# setting title
+- default_reinst
+Reinstall by default
+
+# setting description
+- default_reinst_desc
+Reinstall by default; don't explicitily ask to delete an already installed title.
+
+# shown while installing a queue on the other screen
+#  %1 = current game title
+#  %2 = total titles
+#  %3 = current position in the queue
+- installing_game_x_of_y
+Processing queue: %2/%3
+%1
+
+- no_other_params_prod
+Cannot specify any other parameters when specifying a product code
+
+- invalid_prod
+Invalid product code
+
+- search_prod
+Search by product code
+
+# shown while installing any game
+#  %1 = current game title
+- installing_game
+Installing:
+%1
+
+# scroll, setting title
+- disable_graph
+Disable latency graph
+
+# setting description
+- disable_graph_desc
+Disables the latency graph that is shown while installing a title.
+
+# scroll, setting title
+- goto_region
+Jump to subregion
+
+# setting description
+- goto_region_desc
+Jump to the correct subregion in the subcategory selection if it exists.
+
+- add_music
+You have not yet added any music!
+Try putting music in /3ds/3hs/music on your SD card
+
+- add_playlist
+You have yet to add any playlists!
+Try adding them with the manage option
+
+# noscroll, Keep the [ ], it is used in a menu with other file names
+- add_file_act
+[ add file ]
+
+# noscroll, same as above
+- add_playlist_act
+[ add playlist ]
+
+# keyboard hint
+- new_playlist_name
+New playlist name...
+
+# noscroll, Basic audio engine options (randomize, repeat, stereo)
+- basic_options
+Basic options
+
+# noscroll, audio engine option
+- randomize
+Randomize playlists
+
+# noscroll, audio engine option
+- repeat
+Repeat playlists and songs
+
+# noscroll, stereo ( = multichannel) audio option
+- stereo
+Stereo
+
+# noscroll, Default playlist audio option
+- default_playlist
+Default playlist
+
+# noscroll, other audio engine options (select current file/playlist, manage playlists), may be translated as miscelaneous
+- other
+Other
+
+# button, this string is followed by two buttons, one with "file" and another with "playlist", selects a playlist/file to play
+- select
+Select...
+
+# button, keep lowercase, see comment on select
+- playlist
+playlist
+
+# button, keep lowercase, see comment on select
+- file
+file
+
+# button, save audio engine configuration
+- save
+Save
+
+# button
+- manage_playlists
+Manage playlists
+
+# Button in more menu that leads to audio configuration.
+- audio
+Audio
+
+# button that adds everything in this category as a filter
+- everything
+Everything in this category
+
+# new search method, has the option of quick filtering of official content categories and the regions europe, north-america and japan
+- quick
+Quick
+
+# new search method, has the option of filtering based on advanced filters like on the website
+- filters
+Filters
+
+# Invalid title id error in new search
+- new_invalid_tid
+Error: invalid title ID entered
+Title IDs are usually structured like this: 000400000008B500
+
+# Invalid product code error in new search
+- new_invalid_prod
+Error: invalid product code entered
+Product codes are usually structured like this: CTR-P-ABCD
+
+# Subtitle of the new search methods
+- press_to_switch
+Press UI_GLYPH_L/UI_GLYPH_R to switch modes
+
+# Placeholder for empty search bar
+- empty
+(empty)
+
+# keyboard hint while filling the search bar for new search
+- enter_query
+Enter your query...
+
+# Submit new search and display resulst
+- submit
+Submit
 

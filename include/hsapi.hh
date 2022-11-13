@@ -27,6 +27,7 @@
 #include <ui/loading.hh>
 #include <ui/base.hh>
 
+#include "settings.hh"
 #include "panic.hh"
 #include "error.hh"
 #include "util.hh"
@@ -41,7 +42,7 @@ namespace hsapi
 	using htid       = uint64_t; /* title id type */
 	using hid        = int64_t;  /* landing id type */
 	using hprio      = uint32_t; /* priority */
-	using hflags     = uint32_t; /* flag */
+	using hflags     = uint64_t; /* flag */
 
 	namespace TitleFlag
 	{
@@ -50,6 +51,22 @@ namespace hsapi
 			locale_emulation = 0x2,
 			installer        = 0x4,
 		};
+	}
+
+	namespace VCType
+	{
+		enum VCFlag {
+			none     = 0,
+			gb       = 1,
+			gbc      = 2,
+			gba      = 3,
+			nes      = 4,
+			snes     = 5,
+			gamegear = 6,
+			pcengine = 7
+		};
+		constexpr int shift = 59;
+		constexpr int mask  = 7;
 	}
 
 	namespace impl
@@ -95,8 +112,10 @@ namespace hsapi
 	{
 		std::string subcat; /* subcategory this title belongs to */
 		std::string name; /* name of the title on hShop */
+		std::string alt; /* "" if none */
 		std::string cat; /* category this title belongs to */
 		hsize dlCount; /* amount of title downloads */
+		hflags flags; /* title flags */
 		hsize size; /* filesize */
 		htid tid; /* title id of the title */
 		hid id; /* hShop id */
@@ -108,6 +127,11 @@ namespace hsapi
 		{ return lhs.id == rhs; }
 	} Title;
 
+	inline const std::string& title_name(const hsapi::Title& title)
+	{
+		return ISET_SHOW_ALT ? (title.alt.size() ? title.alt : title.name) : title.name;
+	}
+
 	typedef struct FullTitle : public Title
 	{
 		std::string prod; /* product code */
@@ -115,16 +139,10 @@ namespace hsapi
 //		htimestamp updated; /* last updated timestamp */
 //		htimestamp added; /* added on timestamp */
 		hiver version; /* version int */
-		hflags flags; /* title flags */
+		std::string seed;
 	} FullTitle;
 
-	typedef struct Related
-	{
-		std::vector<FullTitle> updates;
-		std::vector<FullTitle> dlc;
-	} Related;
-	using BatchRelated = std::unordered_map<htid, Related>;
-
+	using BatchRelated = std::unordered_map<htid, std::vector<FullTitle>>;
 
 	void global_deinit();
 	bool global_init();
@@ -135,6 +153,7 @@ namespace hsapi
 	Result upload_log(const char *contents, u32 size, std::string& logid);
 	Result search(std::vector<Title>& ret, const std::unordered_map<std::string, std::string>& params);
 	Result get_download_link(std::string& ret, const Title& title);
+	Result get_theme_preview_png(std::string& ret, hid id);
 	Result get_latest_version_string(std::string& ret);
 	Result title_meta(FullTitle& ret, hid id);
 	Result random(FullTitle& ret);

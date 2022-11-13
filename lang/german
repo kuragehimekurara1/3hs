@@ -117,7 +117,7 @@ Inhalt existiert nicht: %1
 
 - netcon_lost
 Netzwerkverbindung verloren (%1).
-Neuer versuch in $t Sekunden...
+Neuer versuch in %2 Sekunden...
 
 - about_app
 Über
@@ -224,7 +224,7 @@ Ungültige Anfrage
 Drücke UI_GLYPH_A um zurückzukehren
 
 - min_constraint
-Jetztige 3hs-Version ist %1 Versionen älter als die benötigte Version %2
+Jetztige 3hs-Version %1 ist älter als die benötigte Version %2
 
 - proxy
 Proxy
@@ -257,7 +257,7 @@ Der Bildschirm auf dem die Fortschrittsbalken gezeichnet werden sollen
 Den Lichtmodus anschalten. Dies wird das Aussehen der meisten Elemente auf der Benutzeroberfläche ändern.
 
 - resume_dl_desc
-Sollen wir dort fortfahren, wo wir beim ersten Versuch fehlgeschlagen haben?
+Downloads nach Netzwerkunterbrechungen fortsetzen.
 
 - load_space_desc
 Die freier-Speicherplatz Anzeige anzeigen
@@ -324,11 +324,9 @@ Nummer zwischen 0-255 inklusive
 Benutze diese ID, um Hilfe zu bekommen
 %1
 
-- block
-Block
-
-- blocks
-Blöcke
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 Block)";
+else       return "%1 (%2 Blöcke)";
 
 - search_text
 Mithilfe von Text suchen
@@ -428,3 +426,58 @@ Von %1
 
 - themes
 Designs
+
+- delete_unused_tickets
+Nicht benötigte Tickets löschen
+
+- found_unused_tickets
+%1 nicht benötigte Tickets gefunden. Sollen diese entfernt werden?
+
+- found_no_unused_tickets
+Keine nicht benötigten Tickets wurden gefunden.
+
+- invalid_theme_preview
+Ungültige Designvorschau vom Server erhalten!
+
+- hint_add_queue
+UI_GLYPH_Y: zur Warteschlange hinzufügen
+
+- hint_preview_theme
+UI_GLYPH_X: Designvorschau
+
+- alt_name
+Alternativer Name
+
+# setting title
+- show_alt
+Alternative Namen anzeigen
+
+# setting description
+- show_alt_desc
+Alternative Namen anzeigen, wenn verfügbar
+
+# setting title
+- default_reinst
+Standardmäßig neuinstallieren
+
+# setting description
+- default_reinst_desc
+Standardmäßig Inhalte neuinstallieren; nicht fragen, ob ein bereits installierter Inhalt gelöscht werden soll.
+
+# shown while installing a queue on the other screen
+#  %1 = current game title
+#  %2 = total titles
+#  %3 = amount of titles already processed in this queue
+- installing_game_x_of_y
+Verarbeite Warteschlange: %2/%3
+%1
+
+- no_other_params_prod
+Wenn du einen Produkt-Code eingibst, kannst du keine andere Suchparameter eingeben
+
+- invalid_prod
+Ungültiger Produkt-Code
+
+- search_prod
+Mithilfe eines Produkt-Codes suchen
+

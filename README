@@ -20,11 +20,16 @@ and Cremè, for making some nice art.
 
 Requirements:
  - mbedtls (for nnc, which is bundled)
- - perl (to generate language file)
+ - perl (to generate the language file)
  - devkitarm
  - libctru
  - citro2d
  - citro3d
+
+Additional requirements for a CIA build:
+ - bannertool
+ - 3dstool
+ - makerom
 
 Run `make` for a debug build and `make RELEASE=1 cia` for a release cia build.
 
@@ -48,3 +53,30 @@ Additionally you need a file called source/hsapi_auth.c with the following conte
  const char *hsapi_user = "<api-user>";
  const int hsapi_password_length = <password-length-int>;
  void hsapi_password(char *ret) { memcpy(ret, "<api-password>", hsapi_password_length); }
+
+    = = Developement = =
+
+3hs is written in a mix of C and C++, additionally Perl and POSIX shell are used for minor scripting.
+Development is mainly done by the hShop team, however you may send patches either via e-mail or via the
+official hShop Discord server. Github is not used for development, it is just a mirror of the source tree.
+Here is an explication of important directories and their contents:
+
+  3hstool/               contains the source for "3hstool", a tool to create files of various formats used in 3hs
+    default_data/        contains the data for the default light and dark themes
+  3rd/                   contains 3rd party code
+  cia_stuff/             contains all meta files required to build the .cia
+  source/, include/      source code
+    hlink/               incomplete implementation of the hLink server (to be redone)
+    audio/               3hs audio subsystem (C code)
+    ui/                  contains most code relating to the GUI
+    widgets/             contains various miscellaneous widgets for the GUI
+  data/, romfs/          miscellaneous 3hs runtime files
+  supplement_font/       contains everything required to build the supplementary font 3hs uses
+  gfx/                   some hardcoded images not overridable with the theme system
+  lang/                  files for the translation framework and the script to compile it
+  file_forwarder/        the source for the various "file forwarder" applications found on hShop
+  doc/                   symlink to a directory that contains (html) documentation for various 3hs related things
+
+If you need any help understanding the 3hs codebase feel free to e-mail your questions or to send a message
+in the official hShop discord server.
+

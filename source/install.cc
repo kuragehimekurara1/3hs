@@ -26,7 +26,15 @@
 
 #include <3ds.h>
 
-#define BUFSIZE 0x80000
+namespace ui
+{
+	void scan_keys();
+	u32 kDown();
+	u32 kHeld();
+}
+
+//#define BUFSIZE 0x80000
+#define BUFSIZE 0x10000
 
 enum class ITC // inter thread communication
 {
@@ -67,7 +75,7 @@ typedef struct cia_net_data
 
 static Result i_install_net_cia(std::string url, cia_net_data *data, size_t from, httpcContext *pctx)
 {
-	u32 status = 0, dled = 0, remaining, dlnext, written, rdl = 0;
+	u32 status = 0, dled = 0, remaining, dlnext, written;
 	Result res = 0;
 #define CHECKRET(expr) if(R_FAILED(res = ( expr ) )) goto err
 
@@ -125,6 +133,7 @@ static Result i_install_net_cia(std::string url, cia_net_data *data, size_t from
 		goto err;
 	}
 
+  /* Only if from is 0 do we get the full size, else this would return fullSize - from */
 	if(from == 0)
 		CHECKRET(httpcGetDownloadSizeState(pctx, nullptr, &data->totalSize));
 	/* else data->totalSize is already known */
@@ -144,43 +153,33 @@ static Result i_install_net_cia(std::string url, cia_net_data *data, size_t from
 
 	// Install.
 	panic_assert(data->totalSize > from, "invalid download start position");
-	remaining = data->totalSize - from - data->bufferSize;
+	remaining = data->totalSize - from;
 	dlnext = remaining < BUFSIZE ? remaining : BUFSIZE;
-	if(dlnext == 0) goto immediate_install;
 	written = 0;
 
 	while(data->index != data->totalSize)
 	{
 		dlog("receiving data, dlnext=%lu, progress is (session:%lu)%lu/%lu", dlnext, dled, data->index, data->totalSize);
 		panic_if(dlnext > BUFSIZE, "dlnext is invalid");
-		rdl = dled;
-		res = httpcReceiveDataTimeout(pctx, &data->buffer[data->bufferSize], dlnext, 30000000000L);
-immediate_install:
+		/* 8 seconds timeout */
+		res = httpcReceiveDataTimeout(pctx, data->buffer, dlnext, 8000000000L);
 		vlog("httpcReceiveDataTimeout(): 0x%08lX", res);
 		if((R_FAILED(res) && res != (Result) HTTPC_RESULTCODE_DOWNLOADPENDING) || R_FAILED(res = httpcGetDownloadSizeState(pctx, &dled, nullptr)))
 		{
 			elog("aborted http connection due to error: %08lX.", res);
 			goto err;
 		}
-		rdl = dled - rdl;
-		if(rdl != dlnext)
-		{
-			data->bufferSize = rdl;
-			dlnext -= data->bufferSize;
-			ilog("only a chunk was downloaded, retrying");
-			continue;
-		}
-		data->bufferSize = 0;
+		panic_assert(dled + from == data->index + dlnext, "only a chunk was downloaded");
 
 #define CHK_EXIT \
 		if(data->itc == ITC::exit) \
 		{ \
 			dlog("aborted http connection due to ITC::exit"); \
 			res = APPERR_CANCELLED; \
-			goto err; \
+			goto cancelled; \
 		}
 		CHK_EXIT
-		dlog("Writing to cia handle, size=%lu,index=%lu,totalSize=%lu", dlnext, data->index, data->totalSize);
+		dlog("Writing, size=%lu,index=%lu,totalSize=%lu,remaining=%lu", dlnext, data->index, data->totalSize, remaining);
 		if(data->type == ActionType::install)
 		{
 			/* we don't need to add the FS_WRITE_FLUSH flag because AM just ignores write flags... */
@@ -189,7 +188,7 @@ immediate_install:
 		}
 		else
 			data->content->append(data->buffer, dlnext);
-		remaining = data->totalSize - dled - from;
+		remaining -= dlnext;
 		data->index += dlnext;
 		CHK_EXIT
 #undef CHK_EXIT
@@ -198,16 +197,15 @@ immediate_install:
 		svcSignalEvent(data->eventHandle);
 	}
 
-out:
+err:
 	httpcCancelConnection(pctx);
+cancelled:
 	httpcCloseContext(pctx);
 	if(data->index == data->totalSize)
 		data->itc = ITC::exit;
 	svcSignalEvent(data->eventHandle);
 	return res;
 #undef CHECKRET
-err:
-	goto out;
 }
 
 static void i_install_loop_thread_cb(Result& res, get_url_func get_url, cia_net_data& data, httpcContext& hctx)
@@ -268,29 +266,29 @@ static Result i_install_resume_loop(get_url_func get_url, prog_func prog, cia_ne
 
 	// Install thread
 	ctr::thread<Result&, get_url_func, cia_net_data&, httpcContext&> th
-		(i_install_loop_thread_cb, res, get_url, *data, hctx);
+		(i_install_loop_thread_cb, 1, res, get_url, *data, hctx);
 
-	Handle handles[6];
-	handles[0] = data->eventHandle;
-	extern Handle hidEvents[5];
-	memcpy(&handles[1], hidEvents, sizeof(hidEvents));
+	Handle timer;
+	svcCreateTimer(&timer, RESET_ONESHOT);
+	/* fire the timer at least every 0.1 second */
+	svcSetTimer(timer, 100000000L, 100000000L);
+
+	Handle handles[2] = { data->eventHandle, timer };
 	s32 outhandle;
 
 	// UI Loop
 	while(data->itc != ITC::exit)
 	{
-		svcWaitSynchronizationN(&outhandle, handles, 6, false, U64_MAX);
+		svcWaitSynchronizationN(&outhandle, handles, sizeof(handles) / sizeof(Handle), false, U64_MAX);
 		/* other thread signals state update */
 		if(outhandle == 0)
 		{
 			if(data->itc == ITC::exit)
 				break;
-			/* we want to actually cancel the handle so lets not exit() here already */
-			if(!aptMainLoop()) break;
 			if(data->itc == ITC::timeoutscr)
 			{
 				/* we need to display a timeout screen */
-				bool wantsQuit = ui::timeoutscreen(PSTRING(netcon_lost, "0x" + pad8code(res)), 10);
+				bool wantsQuit = ui::timeoutscreen(res, 10);
 				if(wantsQuit) res = APPERR_CANCELLED;
 				prog(data->index, data->totalSize);
 				/* signal that other thread can wake up again */
@@ -300,15 +298,14 @@ static Result i_install_resume_loop(get_url_func get_url, prog_func prog, cia_ne
 			else
 				prog(data->index, data->totalSize);
 		}
-		/* hid event */
-		else
+		/* check for hid event */
+		ui::scan_keys();
+		/* we want to actually cancel the handle so lets not exit() here already if aptMainLoop() is called */
+		if(!aptMainLoop() || ((ui::kDown() | ui::kHeld()) & (KEY_B | KEY_START)))
 		{
-			hidScanInput();
-			if(!aptMainLoop() || (hidKeysDown() & (KEY_B | KEY_START)))
-			{
-				res = APPERR_CANCELLED;
-				break;
-			}
+			res = APPERR_CANCELLED;
+			httpcCancelConnection(&hctx);
+			break;
 		}
 	}
 
@@ -316,6 +313,8 @@ static Result i_install_resume_loop(get_url_func get_url, prog_func prog, cia_ne
 	th.join();
 
 	svcCloseHandle(data->eventHandle);
+	svcCloseHandle(timer);
+
 	delete [] data->buffer;
 	return res;
 }
@@ -337,25 +336,35 @@ static Result net_cia_impl(get_url_func get_url, hsapi::htid tid, bool reinstall
 	Result ret;
 	if(data->type == ActionType::install)
 	{
-		if(reinstallable)
+		bool tik   = ctr::ticket_exists(tid);
+		bool title = ctr::title_exists(tid);
+		if(tik && !title)
+			AM_DeleteTicket(tid);
+		if(reinstallable || ISET_DEFAULT_REINSTALL)
 		{
-			// Ask ninty why this stupid restriction is in place
-			// Basically reinstalling the CURRENT cia requires you
-			// To NOT delete the cia but instead have a higher version
-			// and just install like normal
-			FS_MediaType selfmt;
-			u64 selftid;
-			if(R_FAILED(ret = APT_GetAppletInfo((NS_APPID) envGetAptAppId(), &selftid, (u8 *) &selfmt, nullptr, nullptr, nullptr)))
-				return ret;
-			if(envIsHomebrew() || selftid != tid || dest != selfmt)
+			if(title)
 			{
-				if(R_FAILED(ret = ctr::delete_if_exist(tid, dest)))
+				// Ask ninty why this stupid restriction is in place
+				// Basically reinstalling the CURRENT cia requires you
+				// To NOT delete the cia but instead have a higher version
+				// and just install like normal
+				FS_MediaType selfmt;
+				u64 selftid;
+				if(R_FAILED(ret = APT_GetAppletInfo((NS_APPID) envGetAptAppId(), &selftid, (u8 *) &selfmt, nullptr, nullptr, nullptr)))
 					return ret;
+				if(envIsHomebrew() || selftid != tid || dest != selfmt)
+				{
+					if(R_FAILED(ret = ctr::delete_title(tid, dest, true, true)))
+						return ret;
+
+					// reload dbs
+					AM_QueryAvailableExternalTitleDatabase(NULL);
+				}
 			}
 		}
 		else
 		{
-			if(ctr::title_exists(tid, dest))
+			if(title)
 				return APPERR_NOREINSTALL;
 		}
 
@@ -366,9 +375,7 @@ static Result net_cia_impl(get_url_func get_url, hsapi::htid tid, bool reinstall
 	}
 
 	aptSetHomeAllowed(false);
-	float oldrate = C3D_FrameRate(2.0f);
 	ret = i_install_resume_loop(get_url, prog, data);
-	C3D_FrameRate(oldrate);
 	aptSetHomeAllowed(true);
 
 	if(data->type == ActionType::install)

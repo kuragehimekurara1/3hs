@@ -34,7 +34,7 @@
 namespace next
 {
 	const std::string *sel_cat(size_t *cursor = nullptr);
-	const std::string *sel_sub(const std::string& cat, size_t *cursor = nullptr);
+	const std::string *sel_sub(const std::string& cat, size_t *cursor = nullptr, bool visited = false);
 	hsapi::hid sel_gam(std::vector<hsapi::Title>& titles, size_t *cursor = nullptr);
 	void maybe_install_gam(std::vector<hsapi::Title>& titles);
 }

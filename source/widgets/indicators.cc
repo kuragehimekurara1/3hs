@@ -83,7 +83,7 @@ void ui::FreeSpaceIndicator::update()
 	}
 }
 
-bool ui::FreeSpaceIndicator::render(const ui::Keys& keys)
+bool ui::FreeSpaceIndicator::render(ui::Keys& keys)
 {
 	return ISET_LOAD_FREE_SPACE
 		? this->queue.render_screen(keys, this->screen)
@@ -103,7 +103,7 @@ void ui::TimeIndicator::setup()
 	this->update();
 }
 
-bool ui::TimeIndicator::render(const ui::Keys& keys)
+bool ui::TimeIndicator::render(ui::Keys& keys)
 {
 	this->update();
 	this->text->render(keys);
@@ -230,7 +230,7 @@ static u8 lvl2batlvl(u8 lvl)
 	return ret > 4 ? 4 : ret;
 }
 
-bool ui::BatteryIndicator::render(const ui::Keys& keys)
+bool ui::BatteryIndicator::render(ui::Keys& keys)
 {
 #ifdef RELEASE
 	if(ISET_SHOW_BATTERY)
@@ -261,7 +261,7 @@ void ui::NetIndicator::setup()
 	this->update();
 }
 
-bool ui::NetIndicator::render(const ui::Keys& keys)
+bool ui::NetIndicator::render(ui::Keys& keys)
 {
 	this->update();
 	return this->sprite->render(keys);

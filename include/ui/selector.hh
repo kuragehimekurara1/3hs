@@ -27,11 +27,8 @@ namespace ui
 {
 	namespace constants
 	{
-		constexpr float SEL_LABEL_HEIGHT = 30.0f;
-		constexpr float SEL_LABEL_WIDTH = 200.0f;
-		constexpr float SEL_TRI_WIDTH = 30.0f;
-		constexpr float SEL_FONTSIZ = 0.65f;
-		constexpr float SEL_TRI_PAD = 5.0f;
+		constexpr float SEL_LABEL_DEFAULT_HEIGHT = 30.0f;
+		constexpr float SEL_DEFAULT_FONTSIZ = 0.65f;
 	}
 
 	template <typename TEnum>
@@ -48,14 +45,16 @@ namespace ui
 			for(const std::string& label : labels)
 			{
 				C2D_Text text;
-				C2D_TextParse(&text, this->buf, label.c_str());
+				ui::parse_text(&text, this->buf, label.c_str());
 				C2D_TextOptimize(&text);
 				this->labels.push_back(text);
 			}
 
 			using namespace constants;
-			this->x = (ui::screen_width(this->screen) - SEL_LABEL_WIDTH) / 2;
-			this->y = (ui::dimensions::height - SEL_LABEL_HEIGHT) / 2;
+			/* this is really just a hack from back when this widget was in exclusive mode only */
+			this->resize(ui::screen_width(this->screen) - 50.0f, SEL_LABEL_DEFAULT_HEIGHT);
+			this->x = ui::transform(this, ui::layout::center_x);
+			this->y = ui::transform(this, ui::layout::center_y);
 			this->assign_txty();
 
 			static ui::slot_color_getter getters[] = {
@@ -64,15 +63,59 @@ namespace ui
 			this->slots = ui::ThemeManager::global()->get_slots(this, "Selector", 2, getters);
 		}
 
-		void set_x(float) override { } /* stub */
-		void set_y(float) override { } /* stub */
-
 		void destroy() override
 		{
 			C2D_TextBufClear(this->buf);
 		}
 
-		bool render(const ui::Keys& keys) override
+		void set_x(float x) override
+		{
+			this->x = ui::transform(this, x);
+			this->assign_txty();
+		}
+
+		void set_y(float y) override
+		{
+			this->y = ui::transform(this, y);
+			this->assign_txty();
+		}
+
+		void autowrap() /* override */
+		{
+			using namespace constants;
+			float xlarge = 0.0f, ylarge = 0.0f, x, y;
+			for(C2D_Text& text : this->labels)
+			{
+				C2D_TextGetDimensions(&text, this->fontw, this->fonth, &x, &y);
+				if(x > xlarge) xlarge = x;
+				if(y > ylarge) ylarge = y;
+			}
+			/* we need to divide by 0.76 since resize will multiply by it */
+			this->resize((xlarge + 6.0f) / 0.76f, ylarge + 2.0f);
+			this->assign_txty();
+		}
+
+		void resize(float w, float h) /* override */
+		{
+			/* this is actually a little complicated */
+			this->bw = w * 0.76f; /* the box gets 76% */
+			this->triwp = w * 0.02f; /* the padding gets 2% (2x) */
+			this->triw = w * 0.10f; /* the triangle gets 10% (2x) */
+			this->h = h;
+			this->assign_txty();
+		}
+
+		float width() override
+		{
+			return (this->triwp + this->triw) * 2 + this->bw;
+		}
+
+		float height() override
+		{
+			return this->h;
+		}
+
+		bool render(ui::Keys& keys) override
 		{
 			using namespace constants;
 
@@ -80,37 +123,46 @@ namespace ui
 			// So it is recommended to do something else
 
 			// Draw box for label..
-			C2D_DrawRectSolid(this->x, this->y, this->z, SEL_LABEL_WIDTH, SEL_LABEL_HEIGHT, this->slots.get(0));
+			C2D_DrawRectSolid(this->x + this->triw + this->triwp, this->y, this->z, this->bw, this->h, this->slots.get(0));
 
 			// Draw triangles for next/prev...
 #define TRI() C2D_DrawTriangle(coords[0], coords[1], this->slots.get(0), coords[2], coords[3], this->slots.get(0), \
 			                         coords[4], coords[5], this->slots.get(0), this->z)
-			u32 kdown = keys.kDown;
-			/*     B
-			 *    /|
-			 * A / |
-			 *   \ |
-			 *    \|
-			 *     C
+			u32 kdown = this->exclusiveMode ? keys.kDown : 0;
+			/* illustrated: the result of the following operation (minus the label)
+			 *     B            E
+			 *    /| |--------| |\
+			 * A / | |        | | \ D
+			 *   \ | |        | | /
+			 *    \| |--------| |/
+			 *     C            F
 			 */
 			float coords[6] = {
-				this->x - SEL_TRI_WIDTH, (SEL_LABEL_HEIGHT / 2) + this->y, // A
-				this->x - SEL_TRI_PAD, this->y,                            // B
-				this->x - SEL_TRI_PAD, this->y + SEL_LABEL_HEIGHT          // C
+				this->x,              (this->h / 2) + this->y, // A(0,1)
+				this->x + this->triw, this->y,                 // B(2,3)
+				this->x + this->triw, this->y + this->h        // C(4,5)
 			};
 			TRI(); // prev
-			if((keys.kDown & KEY_TOUCH) && keys.touch.px < coords[2])
+			if(ui::is_touched(keys) && keys.touch.px <= coords[2] && keys.touch.px >= coords[0]
+			                        && keys.touch.py >= coords[3] && keys.touch.py <= coords[5])
+			{
+				ui::set_touch_lock(keys);
 				kdown |= KEY_LEFT;
-			coords[0] += SEL_LABEL_WIDTH + 2*SEL_TRI_WIDTH;
-			coords[2] += SEL_LABEL_WIDTH + 2*SEL_TRI_PAD;
-			coords[4] += SEL_LABEL_WIDTH + 2*SEL_TRI_PAD;
+			}
+			coords[0] += this->triw + this->triwp + this->bw + this->triwp + this->triw; // D(0,1)
+			coords[2] +=              this->triwp + this->bw + this->triwp             ; // E(2,3)
+			coords[4] +=              this->triwp + this->bw + this->triwp             ; // F(4,5)
 			TRI(); // right
-			if((keys.kDown & KEY_TOUCH) && keys.touch.px > coords[2])
+			if(ui::is_touched(keys) && keys.touch.px <= coords[0] && keys.touch.px >= coords[2]
+			                        && keys.touch.py >= coords[3] && keys.touch.py <= coords[5])
+			{
+				ui::set_touch_lock(keys);
 				kdown |= KEY_RIGHT;
+			}
 #undef TRI
 
 			// Draw label...
-			C2D_DrawText(&this->labels[this->idx], C2D_WithColor, this->tx, this->ty, this->z, SEL_FONTSIZ, SEL_FONTSIZ, this->slots.get(1));
+			C2D_DrawText(&this->labels[this->idx], C2D_WithColor, this->tx, this->ty, this->z, this->fontw, this->fonth, this->slots.get(1));
 
 			// Take input...
 			if(keys.kDown & KEY_A)
@@ -126,10 +178,13 @@ namespace ui
 			if(kdown & (KEY_RIGHT | KEY_R))
 				this->wrap_plus();
 
-			if(keys.kDown & KEY_B)
-				return false;
+			return !this->exclusiveMode || !(kdown & KEY_B);
+		}
 
-			return true;
+		void resize_children(float w, float h) /* override */
+		{
+			this->fontw = w;
+			this->fonth = h;
 		}
 
 		void search_set_idx(TEnum value)
@@ -147,37 +202,43 @@ namespace ui
 			}
 		}
 
-		float width()
+		enum connect_type { exclusive_mode, seek };
+
+		void connect(connect_type type, bool val)
 		{
-			using namespace constants;
-			return (SEL_TRI_WIDTH * 2) + (SEL_TRI_PAD * 2) + SEL_LABEL_WIDTH;
+			if(type != exclusive_mode)
+				return;
+			this->exclusiveMode = val;
 		}
 
-		float height()
+		void connect(connect_type type, TEnum val)
 		{
-			using namespace constants;
-			return SEL_LABEL_HEIGHT;
+			if(type != seek)
+				return;
+			this->search_set_idx(val);
 		}
-
 
 	private:
 		ui::SlotManager slots { nullptr };
 
 		const std::vector<TEnum> *values;
 		std::vector<C2D_Text> labels;
+		bool exclusiveMode = true;
 		TEnum *res = nullptr;
 		C2D_TextBuf buf;
 		size_t idx = 0;
 
+		float fontw = ui::constants::SEL_DEFAULT_FONTSIZ, fonth = ui::constants::SEL_DEFAULT_FONTSIZ;
+		float triwp, triw, bw, h;
 		float tx, ty;
 
 		void assign_txty()
 		{
 			using namespace constants;
 			float h, w;
-			C2D_TextGetDimensions(&this->labels[this->idx], SEL_FONTSIZ, SEL_FONTSIZ, &w, &h);
-			this->tx = (SEL_LABEL_WIDTH / 2) - (w / 2) + this->x;
-			this->ty = (SEL_LABEL_HEIGHT / 2) - (h / 2) + this->y;
+			C2D_TextGetDimensions(&this->labels[this->idx], this->fontw, this->fonth, &w, &h);
+			this->tx = this->x + this->triwp + this->triw + ((this->bw / 2.0f) - (w / 2.0f));
+			this->ty = this->y + (this->h / 2) - (h / 2);
 		}
 
 		size_t accumul_size(const std::vector<std::string>& labels)

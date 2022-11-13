@@ -33,15 +33,24 @@ void ui::MenuSelect::setup()
 	this->hint->resize(0.4f, 0.4f);
 }
 
+void ui::MenuSelect::select(size_t pos, u32 pressed_keys)
+{
+	if(this->cursor_move_callback) this->cursor_move_callback();
+	if(this->i < this->btns.size())
+		this->btns[this->i]->set_border(false);
+	this->i = pos;
+	if(this->i < this->btns.size())
+		this->btns[this->i]->set_border(true);
+	this->kdown = pressed_keys;
+}
+
 void ui::MenuSelect::push_button(const std::string& label)
 {
 	u32 myi = this->btns.size();
 	ui::Button *b = ui::builder<ui::Button>(this->screen, label)
 		.connect(ui::Button::click, [this, myi]() -> bool {
-			if(this->cursor_move_callback) this->cursor_move_callback();
-			this->btns[this->i]->set_border(false);
-			this->btns[myi]->set_border(true);
-			this->i = myi;
+			/* pressing equates to clicking A */
+			this->select(myi, KEY_A);
 			this->call_current();
 			return true;
 		})
@@ -73,6 +82,12 @@ void ui::MenuSelect::connect(connect_type t, const std::string& s, callback_t c)
 	this->add_row(s, c);
 }
 
+void ui::MenuSelect::connect(connect_type t, u32 mask)
+{
+	panic_assert(t == ui::MenuSelect::set_key_mask, "expected ::set_key_mask");
+	this->kdownmask = mask;
+}
+
 void ui::MenuSelect::connect(connect_type t, callback_t c)
 {
 	switch(t)
@@ -100,7 +115,7 @@ float ui::MenuSelect::width()
 	return this->w;
 }
 
-bool ui::MenuSelect::render(const ui::Keys& k)
+bool ui::MenuSelect::render(ui::Keys& k)
 {
 	panic_assert(this->btns.size() != 0, "Empty menuselect");
 
@@ -118,7 +133,11 @@ bool ui::MenuSelect::render(const ui::Keys& k)
 		else if(this->i < this->btns.size())           MOVE(this->i = this->btns.size() - 1);
 	}
 #undef MOVE
-	if(k.kDown & KEY_A) this->call_current();
+	if(k.kDown & this->kdownmask)
+	{
+		this->kdown = k.kDown;
+		this->call_current();
+	}
 
 	/* aka u32 i = start_of_page */
 	u32 start = this->i - (this->i % MAX_PER_PAGE);
@@ -128,6 +147,12 @@ bool ui::MenuSelect::render(const ui::Keys& k)
 	this->hint->render(k);
 
 	return true;
+}
+
+void ui::MenuSelect::clear()
+{
+	this->funcs.clear();
+	this->btns.clear();
 }
 
 void ui::MenuSelect::call_current()

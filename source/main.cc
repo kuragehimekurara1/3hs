@@ -23,6 +23,9 @@
 #include <widgets/konami.hh>
 #include <widgets/meta.hh>
 
+#include "audio/configuration.h"
+#include "audio/cwav_reader.h"
+#include "audio/player.h"
 #include "lumalocale.hh"
 #include "installgui.hh"
 #include "settings.hh"
@@ -59,7 +62,7 @@ public:
 		this->t.setup(this->screen, "0 fps");
 	}
 
-	bool render(const ui::Keys& k) override
+	bool render(ui::Keys& k) override
 	{
 		time_t now = time(NULL);
 		if(now != this->frames[this->i].time)
@@ -102,8 +105,6 @@ private:
 
 };
 #endif
-
-#include <ui/checkbox.hh>
 
 int main(int argc, char* argv[])
 {
@@ -162,9 +163,20 @@ int main(int argc, char* argv[])
 	}
 #endif
 
-	if(!(ENVINFO & 1)) ui::notice(STRING(dev_unitinfo), 40.0f);
+	if(!(ENVINFO & 1))
+	{
+		flog("Detected dev ENVINFO, aborting startup");
 
-	init_seeddb();
+		ui::RenderQueue queue;
+
+		ui::builder<ui::Text>(ui::Screen::top, STRING(dev_unitinfo))
+			.x(ui::layout::center_x).y(45.0f)
+			.wrap()
+			.add_to(queue);
+
+		queue.render_finite_button(KEY_START | KEY_B);
+		exit(0);
+	}
 
 	osSetSpeedupEnable(true); // speedup for n3dses
 
@@ -253,6 +265,10 @@ int main(int argc, char* argv[])
 		.tag(ui::tag::free_indicator)
 		.add_to(ui::RenderQueue::global());
 
+	ui::builder<StatusLine>(ui::Screen::top)
+		.tag(ui::tag::status)
+		.add_to(ui::RenderQueue::global());
+
 	ui::builder<ui::TimeIndicator>(ui::Screen::top)
 		.add_to(ui::RenderQueue::global());
 
@@ -268,6 +284,7 @@ int main(int argc, char* argv[])
 #endif
 
 	ui::builder<ui::NetIndicator>(ui::Screen::top)
+		.tag(ui::tag::net_indicator)
 		.add_to(ui::RenderQueue::global());
 
 	// DRM Check
@@ -284,6 +301,34 @@ int main(int argc, char* argv[])
 	}
 #endif
 	// end DRM Check
+
+	/* initialize audio subsystem */
+	panic_assert(R_SUCCEEDED(player_init()), "failed to initialize audio system");
+	atexit(player_exit);
+	panic_assert(acfg_load() == ACE_NONE, "failed to load audio configuration");
+	atexit(acfg_free);
+
+	player_set_switch_callback([](const struct cwav *cwav) -> void {
+		if(cwav->artist) set_status("Playing " + std::string(cwav->title) + " by " + std::string(cwav->artist));
+		else             set_status("Playing " + std::string(cwav->title));
+	});
+
+	panic_assert(acfg_realise() == ACE_NONE, "failed to set audio configuration");
+
+	ui::set_select_command_handler([](u32 kDown) -> void {
+		if(kDown)
+		{
+			/* process audio command */
+			if(kDown & KEY_L) player_previous();
+			if(kDown & KEY_R) player_next();
+			if(kDown & KEY_A) player_unpause();
+			if(kDown & KEY_B) player_pause();
+			if(kDown & KEY_X) { player_halt(); reset_status(); }
+		}
+		else
+			/* show more menu */
+			ui::RenderQueue::global()->render_and_then(show_more);
+	});
 
 	if(!hsapi::global_init())
 	{
@@ -311,6 +356,7 @@ int main(int argc, char* argv[])
 	const std::string *associatedcat = nullptr;
 	const std::string *associatedsub = nullptr;
 	std::vector<hsapi::Title> titles;
+	bool visited_sub = false;
 
 	// Old logic was cursed, made it a bit better :blobaww:
 	while(aptMainLoop())
@@ -322,10 +368,11 @@ cat:
 		ilog("NEXT(c): %s", cat->c_str());
 
 sub:
-		if(associatedcat != cat) subptr = 0;
+		visited_sub = associatedcat == cat;
+		if(!visited_sub) subptr = 0;
 		associatedcat = cat;
 
-		const std::string *sub = next::sel_sub(*cat, &subptr);
+		const std::string *sub = next::sel_sub(*cat, &subptr, visited_sub);
 		if(sub == next_sub_back) goto cat;
 		if(sub == next_sub_exit) break;
 		ilog("NEXT(s): %s", sub->c_str());

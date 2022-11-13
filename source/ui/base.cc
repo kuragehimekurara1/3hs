@@ -40,6 +40,14 @@ static ui::SlotManager slotmgr { nullptr };
 static ui::ScopedWidget<ui::Sprite> top_background;
 static ui::ScopedWidget<ui::Sprite> bottom_background;
 
+static ui::select_command_handler select_command;
+static bool previous_select_was_command;
+static u32 my_kheld, my_kdown;
+
+static bool touch_locked = false;
+
+static LightLock render_and_then_lock;
+
 enum LEDFlags_V {
 	LED_NONE          = 0,
 	LED_RESET_SLEEP   = 1,
@@ -97,6 +105,7 @@ float ui::transform(ui::BaseWidget *wid, float v)
 		return center_pos(ui::dimensions::height, wid->height());
 	}
 
+	/* v <= 0 is invalid */
 	return 0.0f;
 }
 
@@ -138,13 +147,6 @@ float ui::center_align_y(BaseWidget *from, BaseWidget *newel)
 	return center_pos(from->height(), newel->height()) + from->get_y();
 }
 
-void ui::exit()
-{
-	C2D_Fini();
-	C3D_Fini();
-	gfxExit();
-}
-
 void ui::notice(const std::string& msg, float ypos)
 {
 	ui::RenderQueue queue;
@@ -161,18 +163,23 @@ void ui::notice(const std::string& msg, float ypos)
 		.wrap()
 		.add_to(queue);
 
-	queue.render_finite_button(KEY_A | KEY_START);
+	queue.render_finite_button(KEY_A | KEY_START | KEY_B);
 }
 
 static ui::slot_color_getter slotmgr_getters[] = {
 	color_bg
 };
 
+/* both from supplement_sysfont_merger.c */
+extern "C" Result font_merger_run(void);
+extern "C" void font_merger_destroy(void);
+
 static void common_init()
 {
 	g_spritestore.open(SPRITESHEET_PATH);
 	/* TODO: Select correct theme */
-	ui::Theme::global()->replace_with(themes().front());
+	ui::Theme::global()->replace_with(themes().back());
+	ui::ThemeManager::global()->reget();
 	top_background.setup(ui::Screen::top, ui::Sprite::theme, ui::theme::background_top_image);
 	top_background->set_x(0.0f);
 	top_background->set_y(0.0f);
@@ -180,6 +187,8 @@ static void common_init()
 	bottom_background->set_x(0.0f);
 	bottom_background->set_y(0.0f);
 	slotmgr = ui::ThemeManager::global()->get_slots(nullptr, "__global_slot_manager", 1, slotmgr_getters);
+	panic_if_err_3ds(font_merger_run());
+	LightLock_Init(&render_and_then_lock);
 }
 
 void ui::init(C3D_RenderTarget *top, C3D_RenderTarget *bot)
@@ -201,6 +210,14 @@ bool ui::init()
 
 	common_init();
 	return true;
+}
+
+void ui::exit()
+{
+	font_merger_destroy();
+	C2D_Fini();
+	C3D_Fini();
+	gfxExit();
 }
 
 /* class RenderQueue */
@@ -228,23 +245,74 @@ void ui::RenderQueue::clear()
 
 void ui::RenderQueue::push(ui::BaseWidget *wid)
 {
-	if(wid->renders_on() == ui::Screen::bottom)
+	/* none is just an alias for bottom really */
+	if(wid->renders_on() == ui::Screen::bottom || wid->renders_on() == ui::Screen::none)
 		this->bot.push_back(wid);
-	if(wid->renders_on() == ui::Screen::top)
+	else if(wid->renders_on() == ui::Screen::top)
 		this->top.push_back(wid);
 	this->backPtr = wid;
 }
 
-ui::Keys ui::RenderQueue::get_keys()
+void ui::set_select_command_handler(select_command_handler handler)
+{
+	select_command = handler;
+}
+
+void ui::scan_keys()
 {
 	hidScanInput();
+	my_kdown = hidKeysDown();
+	my_kheld = hidKeysHeld();
+	if(hidKeysUp() & KEY_SELECT)
+	{
+		if(previous_select_was_command)
+			previous_select_was_command = false;
+		else
+		{
+			select_command(0);
+			my_kheld = my_kdown = 0;
+		}
+	}
+	else if((my_kheld & KEY_SELECT) && (my_kdown & ~KEY_SELECT))
+	{
+		previous_select_was_command = true;
+		select_command(my_kdown);
+		my_kheld = my_kdown = 0;
+	}
+	else if(my_kheld & KEY_SELECT)
+	{
+		my_kheld = my_kdown = 0;
+	}
+	if(touch_locked && (hidKeysUp() & KEY_TOUCH))
+		touch_locked = false;
+}
+
+ui::Keys ui::RenderQueue::get_keys()
+{
+	ui::scan_keys();
 	ui::Keys keys = {
-		hidKeysDown(), hidKeysHeld(), hidKeysUp(),
+		my_kdown, my_kheld, hidKeysUp(),
 		{ 0, 0 }
 	};
-	hidTouchRead(&keys.touch);
+	if(!touch_locked)
+		hidTouchRead(&keys.touch);
 	return keys;
 }
+
+void ui::set_touch_lock(ui::Keys& keys)
+{
+	ui::set_touch_lock();
+	memset(&keys.touch, 0, sizeof(keys.touch));
+	keys.kDown &= ~KEY_TOUCH;
+}
+
+void ui::set_touch_lock()
+{
+	touch_locked = true;
+}
+
+u32 ui::kHeld() { return my_kheld; }
+u32 ui::kDown() { return my_kdown; }
 
 void ui::maybe_end_frame()
 {
@@ -286,48 +354,85 @@ void ui::RenderQueue::terminate_render()
 	ui::RenderQueue::global()->unsignal(ui::RenderQueue::signal_cancel);
 }
 
-bool ui::RenderQueue::render_frame(const ui::Keys& keys)
+#define rq_start_frame() \
+	if((this->signalBit | g_renderqueue.signalBit) & ui::RenderQueue::signal_cancel) \
+		return false; \
+	\
+	if(!aptMainLoop()) \
+		::exit(0); /* finish */ \
+	if(g_inRender) \
+	{ \
+		C3D_FrameEnd(0); \
+		g_inRender = false; \
+		panic("illegal double render"); \
+	} \
+	\
+	if(LEDFlags & LED_TIMEOUT) \
+		if(time(NULL) > LEDExpireTime) \
+		{ \
+			ui::LED::ResetPattern(); \
+			ui::LED::ClearResetFlags(); \
+		} \
+	\
+	bool isOpen; \
+	if(R_SUCCEEDED(ui::shell_is_open(&isOpen)) && isOpen) \
+	{ \
+		if(LEDFlags & LED_RESET_SLEEP) \
+		{ \
+			ui::LED::ResetPattern(); \
+			ui::LED::ClearResetFlags(); \
+		} \
+	} \
+	/* not rendering if the shell is closed */ \
+	else return true; \
+	\
+	if(!C3D_FrameBegin(C3D_FRAME_SYNCDRAW)) \
+	{ \
+		elog("failed to start frame"); \
+		return true; /* failed to start frame, let's just ignore this frame */ \
+	} \
+	g_inRender = true; \
+	\
+	C2D_TargetClear(g_top, slotmgr.get(0)); \
+	C2D_TargetClear(g_bot, slotmgr.get(0)); \
+
+#define rq_end_frame() \
+	C3D_FrameEnd(0); \
+	g_inRender = false; \
+	\
+	if(g_renderqueue.after_render_complete != nullptr) \
+	{ \
+		std::function<bool()> *func = g_renderqueue.after_render_complete; \
+		g_renderqueue.after_render_complete = nullptr; \
+		ret &= (*func)(); \
+		delete func; \
+	}
+
+
+bool ui::RenderQueue::render_exclusive_frame(ui::Keys& keys)
 {
-	if((this->signalBit | g_renderqueue.signalBit) & ui::RenderQueue::signal_cancel)
-		return false;
+	rq_start_frame();
+	bool ret = true;
 
-	if(!aptMainLoop())
-		::exit(0); /* finish */
-	if(g_inRender)
-	{
-		C3D_FrameEnd(0);
-		g_inRender = false;
-		panic("illegal double render");
-	}
+	C2D_SceneBegin(g_top);
+	if(top_background->has_image())
+		top_background->render(keys);
+	for(ui::BaseWidget *wid : this->top)
+		if(!wid->is_hidden()) ret &= wid->render(keys);
 
-	if(LEDFlags & LED_TIMEOUT)
-		if(time(NULL) > LEDExpireTime)
-		{
-			ui::LED::ResetPattern();
-			LEDFlags = LED_NONE;
-		}
+	C2D_SceneBegin(g_bot);
+	if(bottom_background->has_image())
+		bottom_background->render(keys);
+	for(ui::BaseWidget *wid : this->bot)
+		if(!wid->is_hidden()) ret &= wid->render(keys);
 
-	bool isOpen;
-	if(R_SUCCEEDED(ui::shell_is_open(&isOpen)) && isOpen)
-	{
-		if(LEDFlags & LED_RESET_SLEEP)
-		{
-			ui::LED::ResetPattern();
-			LEDFlags = LED_NONE;
-		}
-	}
-	/* not rendering if the shell is closed */
-	else return true;
+	rq_end_frame();
+	return ret;
+}
 
-	if(!C3D_FrameBegin(C3D_FRAME_SYNCDRAW))
-	{
-		elog("failed to start frame");
-		return true; /* failed to start frame, let's just ignore this frame */
-	}
-	g_inRender = true;
-
-	C2D_TargetClear(g_top, slotmgr.get(0));
-	C2D_TargetClear(g_bot, slotmgr.get(0));
+bool ui::RenderQueue::render_frame(ui::Keys& keys)
+{
+	rq_start_frame();
 	bool ret = true;
 
 	C2D_SceneBegin(g_top);
@@ -344,24 +449,17 @@ bool ui::RenderQueue::render_frame(const ui::Keys& keys)
 		if(!wid->is_hidden()) ret &= wid->render(keys);
 	ret &= g_renderqueue.render_bottom(keys);
 
-	C3D_FrameEnd(0);
-	g_inRender = false;
-
-	if(g_renderqueue.after_render_complete != nullptr)
-	{
-		std::function<bool()> *func = g_renderqueue.after_render_complete;
-		g_renderqueue.after_render_complete = nullptr;
-		ret &= (*func)();
-		delete func;
-	}
-
+	rq_end_frame();
 	return ret;
 }
 
 void ui::RenderQueue::render_and_then(std::function<bool()> cb)
 {
+	panic_assert(this == &g_renderqueue, "can only apply render-and-then strategy to global renderqueue");
+	LightLock_Lock(&render_and_then_lock);
 	panic_assert(this->after_render_complete == nullptr, "illegal double after_render_complete");
 	this->after_render_complete = new std::function<bool()>(cb);
+	LightLock_Unlock(&render_and_then_lock);
 }
 
 void ui::RenderQueue::render_and_then(std::function<void()> cb)
@@ -388,12 +486,12 @@ bool ui::RenderQueue::render_frame()
 	return this->render_frame(keys);
 }
 
-bool ui::RenderQueue::render_screen(const ui::Keys& keys, ui::Screen screen)
+bool ui::RenderQueue::render_screen(ui::Keys& keys, ui::Screen screen)
 {
 	return screen == ui::Screen::top ? this->render_top(keys) : this->render_bottom(keys);
 }
 
-bool ui::RenderQueue::render_bottom(const ui::Keys& keys)
+bool ui::RenderQueue::render_bottom(ui::Keys& keys)
 {
 	bool ret = true;
 	for(ui::BaseWidget *wid : this->bot)
@@ -401,7 +499,7 @@ bool ui::RenderQueue::render_bottom(const ui::Keys& keys)
 	return ret;
 }
 
-bool ui::RenderQueue::render_top(const ui::Keys& keys)
+bool ui::RenderQueue::render_top(ui::Keys& keys)
 {
 	bool ret = true;
 	for(ui::BaseWidget *wid : this->top)
@@ -481,6 +579,12 @@ void ui::Text::setup(const std::string& label)
 void ui::Text::setup()
 { this->set_text(""); }
 
+void ui::Text::connect(ui::Text::connect_type t, float w)
+{
+	panic_assert(t == ui::Text::max_width, "invalid connect_type");
+	this->maxw = w;
+}
+
 void ui::Text::prepare_arrays()
 {
 	if(this->buf == nullptr)
@@ -496,7 +600,7 @@ void ui::Text::prepare_arrays()
 		this->lines.clear();
 	}
 
-	int width = ui::screen_width(this->screen) - this->x;
+	int width = this->maxw ? this->maxw : ui::screen_width(this->screen) - this->x;
 
 	float curWidth = 0;
 	char codepoint[5] = { 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -559,7 +663,7 @@ void ui::Text::prepare_arrays()
 		if(this->doAutowrap)
 		{
 			/* this seems inefficient, is there a better way to do this? */
-			C2D_TextParse(&linetext, linebuf, cur.c_str());
+			ui::parse_text(&linetext, linebuf, cur.c_str());
 			C2D_TextGetDimensions(&linetext, this->xsiz, this->ysiz, &curWidth, nullptr);
 			curWidth += 10.0f; /* small margin */
 			C2D_TextBufClear(linebuf);
@@ -591,7 +695,7 @@ void ui::Text::push_str(const std::string& str)
 		return;
 	}
 	this->lines.emplace_back();
-	C2D_TextParse(&this->lines.back(), this->buf, str.c_str());
+	ui::parse_text(&this->lines.back(), this->buf, str.c_str());
 	C2D_TextOptimize(&this->lines.back());
 }
 
@@ -606,7 +710,7 @@ static float get_center_x(C2D_Text *txt, float xsiz, float ysiz, ui::Screen scre
 	return ((ui::screen_width(screen) / 2) - (width / 2.0f));
 }
 
-bool ui::Text::render(const ui::Keys& keys)
+bool ui::Text::render(ui::Keys& keys)
 {
 	((void) keys);
 
@@ -751,7 +855,7 @@ float ui::Sprite::width()
 	return this->sprite.image.subtex->width;
 }
 
-bool ui::Sprite::render(const ui::Keys& keys)
+bool ui::Sprite::render(ui::Keys& keys)
 {
 	((void) keys); // unused
 	C2D_DrawSprite(&this->sprite);
@@ -896,30 +1000,31 @@ void ui::Button::readjust()
 	this->oy = this->y + this->h;
 }
 
-bool ui::Button::render(const ui::Keys& keys)
+bool ui::Button::press()
+{
+	return this->on_click();
+}
+
+bool ui::Button::render(ui::Keys& keys)
 {
 	if(this->showBorder) C2D_DrawRectSolid(this->x - 1, this->y - 1, 0.0f, this->w + 2, this->h + 2, this->slots.get(0));
 	if(this->showBg) C2D_DrawRectSolid(this->x, this->y, 0.1f, this->w, this->h, this->slots.get(1));
 	this->widget->render(keys);
 
-	if(this->state == ST_PREVHELD)
+	if(ui::is_touched(keys) && keys.touch.px >= this->x && keys.touch.px <= this->ox &&
+			keys.touch.py >= this->y && keys.touch.py <= this->oy)
 	{
-		this->state = ((keys.kDown | keys.kHeld) & KEY_TOUCH)
-			? ST_PREVHELD : ST_NONE;
+		ui::set_touch_lock(keys);
+		return this->press();
 	}
-
-	if(this->state != ST_PREVHELD)
-		if(keys.touch.px >= this->x && keys.touch.px <= this->ox &&
-				keys.touch.py >= this->y && keys.touch.py <= this->oy)
-			return this->on_click();
 
 	return true;
 }
 
 void ui::Button::autowrap()
 {
-	this->w = this->widget->width() + (this->showBg ? 0.0f : 10.0f);
-	this->h = this->widget->height() + (this->showBg ? 0.0f : 2.0f);
+	this->w = this->widget->width() + (this->showBg ? 6.0f : 10.0f);
+	this->h = this->widget->height() + (this->showBg ? 2.0f : 2.0f);
 	this->readjust();
 }
 
@@ -959,7 +1064,7 @@ float ui::Button::textwidth()
 void ui::ButtonCallback::setup(u32 keys)
 { this->keys = keys; }
 
-bool ui::ButtonCallback::render(const ui::Keys& keys)
+bool ui::ButtonCallback::render(ui::Keys& keys)
 {
 	switch(this->type)
 	{
@@ -987,6 +1092,8 @@ void ui::ButtonCallback::connect(ui::ButtonCallback::connect_type type, std::fun
 	this->cb = cb;
 }
 
+/* core widget class Toggle */
+
 #define SLIDER_X(t) (t->toggled_state ? (t->x + 2) + (t->width() - 4) / 2 : (t->x + 2))
 #define SLIDER_Y(t) (t->y + 2)
 #define SLIDER_WIDTH(t) ((t->width() - 4) / 2)
@@ -1011,7 +1118,7 @@ void ui::Toggle::toggle(bool toggled)
 	this->toggle_cb();
 }
 
-bool ui::Toggle::render(const ui::Keys& keys)
+bool ui::Toggle::render(ui::Keys& keys)
 {
 	if((keys.touch.px >= SLIDER_X(this) && keys.touch.px <= SLIDER_X(this) + SLIDER_WIDTH(this)) && (keys.touch.py >= SLIDER_Y(this) && keys.touch.py <= SLIDER_Y(this) + SLIDER_HEIGHT(this)) && (osGetTime() - this->last_touch_toggle) >= 300)
 	{
@@ -1024,6 +1131,81 @@ bool ui::Toggle::render(const ui::Keys& keys)
 
 	return true;
 }
+
+/* WidgetGroup */
+
+void ui::WidgetGroup::add(ui::BaseWidget *w)
+{ this->ws.push_back(w); }
+
+void ui::WidgetGroup::set_hidden(bool b)
+{
+	for(ui::BaseWidget *w : this->ws)
+		w->set_hidden(b);
+}
+
+void ui::WidgetGroup::set_y_descending(float pos, float elpadding)
+{
+	for(ui::BaseWidget *w : this->ws)
+	{
+		w->set_y(pos);
+		pos += elpadding;
+		pos += w->height();
+	}
+}
+
+void ui::WidgetGroup::position_under(ui::BaseWidget *other, float initpad, float elpadding)
+{
+	if(!this->ws.size()) return;
+	this->set_y_descending(ui::under(other, this->ws[0], initpad), elpadding);
+}
+
+void ui::WidgetGroup::position_under_horizontal(ui::BaseWidget *other, float pad)
+{
+	/* first we get the highest widget so we can center all around it */
+	float middle, hmax = 0.0f, h;
+	for(ui::BaseWidget *w : this->ws)
+		if((h = w->height()) > hmax)
+			hmax = h;
+	middle = other->get_y() + other->height() + pad + (hmax / 2.0f);
+	for(ui::BaseWidget *w : this->ws)
+		w->set_y(middle - (w->height() / 2.0f));
+}
+
+#define DEFINE_GROUP_MAXMIN_FUNC(func_name, prop_get, cmp, init_val) \
+	ui::BaseWidget *ui::WidgetGroup::func_name() \
+	{ \
+		if(!this->ws.size()) return nullptr; \
+		ui::BaseWidget *ret; float max = init_val, v; \
+		for(ui::BaseWidget *w : this->ws) \
+			if((v = prop_get) cmp max) \
+			{ \
+				max = v; \
+				ret = w; \
+			} \
+		return ret; \
+	}
+
+DEFINE_GROUP_MAXMIN_FUNC(max_height, w->height(), >, 0.0f)
+DEFINE_GROUP_MAXMIN_FUNC(min_height, w->height(), <, this->ws[0]->height())
+DEFINE_GROUP_MAXMIN_FUNC(max_width, w->width(), >, 0.0f)
+DEFINE_GROUP_MAXMIN_FUNC(min_width, w->width(), <, this->ws[0]->width())
+DEFINE_GROUP_MAXMIN_FUNC(highest, w->get_y(), <, this->ws[0]->get_y()) /* misleading! intentional */
+DEFINE_GROUP_MAXMIN_FUNC(lowest, w->get_y() + w->height(), >, 0.0f) /* misleading! intentional */
+DEFINE_GROUP_MAXMIN_FUNC(rightmost, w->get_x() + w->width(), >, 0.0f)
+DEFINE_GROUP_MAXMIN_FUNC(leftmost, w->get_x(), <, this->ws[0]->get_x())
+
+#undef DEFINE_GROUP_MAXMIN_FUNC
+
+void ui::WidgetGroup::translate(float x, float y)
+{
+	for(ui::BaseWidget *w : this->ws)
+	{
+		w->set_x(w->get_x() + x);
+		w->set_y(w->get_y() + y);
+	}
+}
+
+/* LED */
 
 void ui::LED::Solid(ui::LED::Pattern *info, u32 animation, u8 r, u8 g, u8 b)
 {
@@ -1043,7 +1225,7 @@ Result ui::LED::SetPattern(ui::LED::Pattern *info)
 
 	cmdbuf[0] = 0x08010640; // https://www.3dbrew.org/wiki/PTMSYSM:SetInfoLEDPattern
 	cmdbuf[1] = info->animation;
-	memcpy(&cmdbuf[ 2],  info->red_pattern,  32);
+	memcpy(&cmdbuf[ 2], info->red_pattern  , 32);
 	memcpy(&cmdbuf[10], info->green_pattern, 32);
 	memcpy(&cmdbuf[18], info->blue_pattern , 32);
 
@@ -1069,9 +1251,10 @@ void ui::LED::SetTimeout(time_t newTime)
 	LEDExpireTime = newTime;
 }
 
-void ui::LED::ClearTimeout(void)
+void ui::LED::ClearResetFlags(void)
 {
-	LEDFlags &= ~LED_TIMEOUT;
+	/* functionally equivalent to LEDFlags = LED_NONE currently */
+	LEDFlags &= ~(LED_TIMEOUT | LED_SLEEP_MODE);
 }
 
 Result ui::LED::ResetPattern()

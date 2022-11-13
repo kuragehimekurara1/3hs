@@ -64,6 +64,9 @@
 #define UI_LED_MAKE_ANIMATION(delay, smoothing, loop_delay) \
 	((((delay) & 0xFF) << 24) | (((smoothing) & 0xFF) << 16) | (((loop_delay) & 0xFF) << 8))
 
+/* from supplement_sysfont_merger.c */
+extern "C" C2D_Font ui__sysFontWithSupplement;
+
 namespace ui
 {
 	namespace LED
@@ -82,14 +85,16 @@ namespace ui
 		Result SetPattern(Pattern *info);
 		void SetTimeout(time_t newTime);
 		Result ResetPattern(void);
-		void ClearTimeout(void);
+		void ClearResetFlags(void);
 	}
 
 	class BaseWidget; /* forward declaration */
 
 	enum class Screen
 	{
-		top, bottom
+		top, bottom,
+		/* to be used by utility widgets */
+		none
 	};
 
 	namespace dimensions
@@ -113,20 +118,22 @@ namespace ui
 	namespace layer
 	{
 		constexpr float middle = 0.5f;
-		constexpr float top    = 1.0f;
-		constexpr float bottom = 0.0f;
+		constexpr float top    = 0.9f;
+		constexpr float bottom = 0.1f;
 	}
 
 	namespace tag
 	{
-		constexpr int action         = -1; /* action header */
-		constexpr int more           = -2; /* more button */
-		constexpr int settings       = -3; /* settings button */
-		constexpr int search         = -4; /* search button */
-		constexpr int queue          = -5; /* queue button */
-		constexpr int konami         = -6; /* konami listner */
-		constexpr int free_indicator = -7; /* free space indicator */
-		constexpr int random         = -8; /* random button */
+		constexpr int action         = -1;  /* action header */
+		constexpr int more           = -2;  /* more button */
+		constexpr int settings       = -3;  /* settings button */
+		constexpr int search         = -4;  /* search button */
+		constexpr int queue          = -5;  /* queue button */
+		constexpr int konami         = -6;  /* konami listner */
+		constexpr int free_indicator = -7;  /* free space indicator */
+		constexpr int random         = -8;  /* random button */
+		constexpr int status         = -9;  /* status line */
+		constexpr int net_indicator  = -10; /* network indicator */
 	};
 
 	/* holds sprite ids used for ui::SpriteStore::get_by_id() */
@@ -155,6 +162,20 @@ namespace ui
 		u32 kDown, kHeld, kUp;
 		touchPosition touch;
 	};
+
+	inline const char *parse_text(C2D_Text *text, C2D_TextBuf buf, const char *str)
+	{
+		return C2D_TextFontParse(text, ui__sysFontWithSupplement, buf, str);
+	}
+
+	typedef void (*select_command_handler)(u32 kHeld);
+	void set_select_command_handler(select_command_handler handler);
+
+	void set_touch_lock(ui::Keys& keys);
+	void set_touch_lock();
+	void scan_keys();
+	u32 kDown();
+	u32 kHeld();
 
 	/* do not use */
 	void maybe_end_frame();
@@ -202,6 +223,11 @@ namespace ui
 
 	Result shell_is_open(bool *is_open);
 
+	constexpr inline bool is_touched(const ui::Keys& keys)
+	{
+		return (keys.kDown | keys.kHeld) & KEY_TOUCH;
+	}
+
 	/* base widget class */
 	class BaseWidget
 	{
@@ -221,6 +247,9 @@ namespace ui
 			else this->x = ui::transform(this, x);
 		}
 
+		void set_raw_x(float x) { this->x = x; }
+		void set_raw_y(float y) { this->y = y; }
+
 		virtual void set_y(float y) { this->y = ui::transform(this, y); }
 		virtual void set_z(float z) { this->z = z; }
 
@@ -228,7 +257,7 @@ namespace ui
 
 		virtual void set_center_x() { this->x = ui::transform(this, ui::layout::center_x); }
 
-		virtual bool render(const ui::Keys& keys) = 0;
+		virtual bool render(ui::Keys& keys) = 0;
 		virtual void destroy() { }
 
 		virtual float height() = 0;
@@ -262,6 +291,31 @@ namespace ui
 
 	};
 
+	/* class for basic operations on an array of widgets */
+	class WidgetGroup
+	{
+	public:
+		void position_under(ui::BaseWidget *other, float initpad = 4.0f, float elpadding = 2.0f);
+		void position_under_horizontal(ui::BaseWidget *other, float pad = 3.0f);
+		void set_y_descending(float base, float elpadding = 2.0f);
+		void translate(float x, float y);
+		void add(ui::BaseWidget *w);
+		void set_hidden(bool b);
+
+		ui::BaseWidget *max_height();
+		ui::BaseWidget *max_width();
+		ui::BaseWidget *min_height();
+		ui::BaseWidget *min_width();
+		ui::BaseWidget *highest();
+		ui::BaseWidget *lowest();
+		ui::BaseWidget *rightmost();
+		ui::BaseWidget *leftmost();
+
+	private:
+		std::vector<ui::BaseWidget *> ws;
+
+	};
+
 	/* Renders a list of derivatives of ui::BaseWidget */
 	class RenderQueue
 	{
@@ -283,17 +337,21 @@ namespace ui
 		/* Renders until keys.kDown & kDownMask > 0 or if render_frame() returns false */
 		void render_finite_button(u32 kDownMask);
 		/* returns false if this should be the last frame,
+		 * else returns true.
+		 * Same as render_frame() except the global queue doesn't get rendered */
+		bool render_exclusive_frame(ui::Keys&);
+		/* returns false if this should be the last frame,
 		 * else returns true */
-		bool render_frame(const ui::Keys&);
+		bool render_frame(ui::Keys&);
 		/* returns false if this should be the last frame,
 		 * else returns true */
 		bool render_frame();
 		/* renders only the bottom widgets */
-		bool render_bottom(const ui::Keys&);
+		bool render_bottom(ui::Keys&);
 		/* renders only the top widgets */
-		bool render_top(const ui::Keys&);
+		bool render_top(ui::Keys&);
 		/* renders a frame on `screen` */
-		bool render_screen(const ui::Keys&, ui::Screen screen);
+		bool render_screen(ui::Keys&, ui::Screen screen);
 		/* removes all widgets in the queue */
 		void clear();
 		/* runs the callback after the frame render is done. Runs only once
@@ -327,6 +385,11 @@ namespace ui
 		{
 			return (TWidget *) this->backPtr;
 		}
+		/* adds the last pushed element to a group */
+		void group_last(ui::WidgetGroup& group)
+		{
+			group.add(this->backPtr);
+		}
 
 		/* Gets the global RenderQueue */
 		static ui::RenderQueue *global();
@@ -345,6 +408,11 @@ namespace ui
 
 
 	};
+
+	inline constexpr float diff(float a, float b)
+	{
+		return a > b ? a - b : b - a;
+	}
 
 	/* builder for a ui::BaseWidget derivative */
 	template <typename TWidget>
@@ -410,12 +478,14 @@ namespace ui
 		ui::builder<TWidget>& middle(ui::BaseWidget *w, float offset = -1.0f) { this->el->set_y(ui::ycenter_rel(w, this->el) - offset); return *this; }
 		/* sets the y position of the OTHER widget to the center of this relative to the y-axis */
 		ui::builder<TWidget>& omiddle(ui::BaseWidget *w, float offset = -1.0f) { w->set_y(ui::ycenter_rel(this->el, w) - offset); return *this; }
-		/* sets the y of the building widget to that of another one */
-		ui::builder<TWidget>& align_y(ui::BaseWidget *w, float offset = 0.0f) { this->el->set_y(w->get_y() - offset); return *this; }
+		/* sets the y of the building widget to that of another one offseted so it hits the baseline of the other one */
+		ui::builder<TWidget>& align_y(ui::BaseWidget *w, float offset = 0.0f) { this->el->set_y(w->get_y() - offset + diff(w->height(), this->el->height())); return *this; }
 		/* sets the x of the building widget to that of another one */
 		ui::builder<TWidget>& align_x(ui::BaseWidget *w, float offset = 0.0f) { this->el->set_x(w->get_x() + offset); return *this; }
 		/* sets the y of the building widget to the center of another one */
 		ui::builder<TWidget>& align_y_center(ui::BaseWidget *w) { this->el->set_y(ui::center_align_y(w, this->el)); return *this; }
+		/* swaps the slots for a widget */
+		ui::builder<TWidget>& swap_slots(const StaticSlot& slot) { this->el->slots = ui::ThemeManager::global()->get_slots(this->el, slot.id, slot.count, slot.getters); return *this; }
 
 		/* Add the built widget to a RenderQueue */
 		void add_to(ui::RenderQueue& queue) { queue.push((ui::BaseWidget *) this->finalize()); }
@@ -461,10 +531,16 @@ namespace ui
 	public:
 		~ScopedWidget()
 		{
+			this->destroy();
+		}
+
+		void destroy()
+		{
 			if(this->wid != nullptr)
 			{
 				this->wid->destroy();
 				delete this->wid;
+				this->wid = nullptr;
 			}
 		}
 
@@ -502,7 +578,7 @@ namespace ui
 		void setup(); /* inits with an empty string */
 		void destroy() override;
 
-		bool render(const ui::Keys&) override;
+		bool render(ui::Keys&) override;
 		float height() override;
 		float width() override;
 
@@ -517,10 +593,12 @@ namespace ui
 		/* gets the current text of the widget */
 		const std::string& get_text();
 
+		enum connect_type { max_width };
+		void connect(connect_type, float);
 
-	private:
+		/* the slots may be overriden here */
 		UI_SLOTS_PROTO(Text_color, 1)
-
+	private:
 		void push_str(const std::string& str);
 		void prepare_arrays();
 		void reset_scroll();
@@ -532,6 +610,7 @@ namespace ui
 		float lineHeight = 0.0f;
 		bool drawCenter = false;
 		bool doScroll = false;
+		float maxw = 0.0f;
 		std::string text;
 
 		struct ScrollCtx {
@@ -567,10 +646,17 @@ namespace ui
 				sprite.params.pos.h = sprite.image.subtex->height;
 			}
 		}
+		static void image(C2D_Sprite& sprite, u32 data)
+		{
+			C2D_Image *ptr = (C2D_Image *) data;
+			sprite.image = *ptr;
+			sprite.params.pos.w = sprite.image.subtex->width;
+			sprite.params.pos.h = sprite.image.subtex->height;
+		}
 
 		void setup(std::function<void(C2D_Sprite&, u32)> get_cb, u32 data = 0);
 
-		bool render(const ui::Keys&) override;
+		bool render(ui::Keys&) override;
 		float height() override;
 		float width() override;
 
@@ -610,7 +696,7 @@ namespace ui
 		void destroy() override;
 		void setup();
 
-		bool render(const ui::Keys&) override;
+		bool render(ui::Keys&) override;
 		float height() override;
 		float width() override;
 
@@ -621,6 +707,8 @@ namespace ui
 		void set_x(float x) override;
 		void set_y(float x) override;
 		void set_z(float z) override;
+
+		bool press();
 
 		/* autowrap for text size */
 		void autowrap();
@@ -648,10 +736,6 @@ namespace ui
 		float w = 0.0f, h = 0.0f;
 
 		void readjust();
-		enum StateFlags {
-			ST_NONE,
-			ST_PREVHELD,
-		} state = ST_PREVHELD;
 
 
 	};
@@ -663,7 +747,7 @@ namespace ui
 	public:
 		void setup(u32 keys);
 
-		bool render(const ui::Keys&) override;
+		bool render(ui::Keys&) override;
 		float height() override { return 0.0f; }
 		float width() override { return 0.0f; }
 
@@ -690,7 +774,7 @@ namespace ui
 	{ UI_WIDGET("Toggle")
 	public:
 		void setup(bool state, std::function<void()> on_toggle_cb);
-		bool render(const ui::Keys& keys) override;
+		bool render(ui::Keys& keys) override;
 		float height() override { return 20.0f; }
 		float width() override { return 40.0f; }
 		void toggle(bool toggled);
@@ -732,7 +816,7 @@ namespace ui
 		TInt blk = (double) i / 1024 / 128;
 		blk = blk == 0 ? 1 : blk;
 
-		return ret + std::string(" (") + std::to_string(blk) + " " + (blk == 1 ? STRING(block) : STRING(blocks)) + ")";
+		return PSTRING(size_plus_block, ret, blk);
 	}
 }
 

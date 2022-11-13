@@ -117,7 +117,7 @@ Ce titre n'existe pas: %1
 
 - netcon_lost
 Connection perdue (%1).
-On recommence dans $t secondes...
+On recommence dans %2 secondes...
 
 - about_app
 À propos
@@ -194,7 +194,7 @@ manuel
 désactivé
 
 - patching_reboot
-Luma3DS Game Patching est maintenant activé.
+Luma3DS game patching est maintenant activé.
 La console doit-être redémarré pour que ce changement marche.
 
 - reboot_now
@@ -324,11 +324,9 @@ Valuer entre 0 et 255
 Utilisez cet ID pour obtenir de l'aide:
 %1
 
-- block
-bloc
-
-- blocks
-blocs
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 bloc)";
+else       return "%1 (%2 blocs)";
 
 - search_text
 Recherce par text
@@ -427,4 +425,60 @@ par %1
 
 - themes
 Thèmes
+
+- delete_unused_tickets
+Effacer les tickets inutilisés
+
+- found_unused_tickets
+%1 tickets inutilisés ont été trouvés. Veux-tu les supprimer?
+
+- found_no_unused_tickets
+Aucun ticket inutilisé trouvé.
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+Aperçu du thème non valide récupéré du serveur!
+
+- hint_add_queue
+UI_GLYPH_Y: Ajouter à la file
+
+- hint_preview_theme
+UI_GLYPH_X: Aperçu du thème
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+Autre nom
+
+# setting title
+- show_alt
+Montre le nom différent
+
+# setting description
+- show_alt_desc
+Montre différent noms, si disponsible.
+
+# setting title
+- default_reinst
+Réinstaller par défault
+
+# setting description
+- default_reinst_desc
+Réinstaller par défault; ne demandez pas explicitement de supprimer un titre déjà installé.
+
+# shown while installing a queue on the other screen
+#  %1 = current game title
+#  %2 = total titles
+#  %3 = current position in the queue
+- installing_game_x_of_y
+File d'attente de traitement: %2/%3
+%1
+
+- no_other_params_prod
+Tu peux pas spécifier d'autres paramètres quand tu spécifie un code de produit
+
+- invalid_prod
+Code de produit non valide
+
+- search_prod
+Chercher par code de produit
 

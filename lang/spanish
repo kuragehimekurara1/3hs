@@ -117,7 +117,7 @@ El título no existe: %1
 
 - netcon_lost
 Se perdió la conexión con la red (%1).
-Reintentando en $t segundos...
+Reintentando en %2 segundos...
 
 - about_app
 Acerca de
@@ -324,11 +324,9 @@ Valor entre 0 y 255
 Usa este ID para conseguir soporte:
 %1
 
-- block
-bloque
-
-- blocks
-bloques
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 bloque)";
+else       return "%1 (%2 bloques)";
 
 - search_text
 Buscar por texto
@@ -431,4 +429,65 @@ hecho por %1
 # nowrap, burger menu item
 - themes
 Temas
+
+# nowrap, burger menu item
+- delete_unused_tickets
+Eliminar tickets sin uso
+
+# asking user if they want to delete unused tickets, %1 = amount of unused tickets that were found
+- found_unused_tickets
+Se encontró %1 ticket no utilizado/s. ¿Eliminar?
+
+# informing user that no missing tickets were found
+- found_no_unused_tickets
+No se encontraron tickets sin uso.
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+Se ha obtenido una vista previa inválida del tema desde el servidor!
+
+# hinting the user to press Y to add to queue in extmeta
+- hint_add_queue
+UI_GLYPH_Y: añadir a la cola
+
+# hinting the user to press X to preview theme in extmeta if category is themes
+- hint_preview_theme
+UI_GLYPH_X: previsualizar el tema
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+Nombre alternativo
+
+# setting title
+- show_alt
+Mostrar nombre alternativo
+
+# setting description
+- show_alt_desc
+Muestra nombres alternativos en la lista de títulos principales si están disponibles.
+
+# setting title
+- default_reinst
+Reinstall by default
+
+# setting description
+- default_reinst_desc
+Desinstalar por defecto; no pedir explícitamente que se elimine un título ya instalado.
+
+# shown while installing a queue on the other screen
+#  %1 = current game title
+#  %2 = total titles
+#  %3 = amount of titles already processed in this queue
+- installing_game_x_of_y
+Procesando cola: %2/%3
+%1
+
+- no_other_params_prod
+No se puede especificar otros parámetros al determinar un código de producto
+
+- invalid_prod
+Código de producto inválido
+
+- search_prod
+Buscar por código de producto
 

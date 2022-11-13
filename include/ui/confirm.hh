@@ -29,7 +29,7 @@ namespace ui
 	public:
 		void setup(const std::string& label, bool& ret);
 
-		bool render(const ui::Keys&) override;
+		bool render(ui::Keys&) override;
 		float height() override;
 		float width() override;
 

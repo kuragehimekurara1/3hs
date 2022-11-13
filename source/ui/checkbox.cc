@@ -1,12 +1,28 @@
+/* This file is part of 3hs
+ * Copyright (C) 2021-2022 hShop developer team
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #include <ui/checkbox.hh>
+#include "panic.hh"
+
+#define BORDER_THICKNESS 1.0f/*px*/
+#define BORDER_THICKNESS2 (BORDER_THICKNESS*2.0f)
 
 UI_CTHEME_GETTER(color_border, ui::theme::checkbox_border_color)
 UI_CTHEME_GETTER(color_check, ui::theme::checkbox_check_color)
 UI_SLOTS(ui::CheckBox, color_border, color_check)
-
-#define BORDER_THICKNESS 1.0f/*px*/
-#define BORDER_THICKNESS2 (BORDER_THICKNESS*2)
 
 
 void ui::CheckBox::setup(bool isInitialChecked)
@@ -35,45 +51,44 @@ void ui::CheckBox::set_x(float x)
 	this->ox = x + this->w;
 }
 
-bool ui::CheckBox::render(const ui::Keys& keys)
+void ui::CheckBox::connect(connect_type t, std::function<void(bool)> cb)
 {
-	/* the checkbox may get pressed here */
-	if(keys.touch.px >= this->x && keys.touch.px <= this->ox &&
-			keys.touch.py >= this->y && keys.touch.py <= this->oy)
-	{
-		if(!(this->flags & ui::CheckBox::LOCKED))
-		{
-			this->flags |= ui::CheckBox::LOCKED;
-			this->flags ^= ui::CheckBox::CHECKED;
-		}
-	}
-	else
-		this->flags &= ~ui::CheckBox::LOCKED;
-	/* maybe draw check */
-	if(this->flags & ui::CheckBox::CHECKED)
-	{
-		/* who cares about offseting this with BORDER_THICKNESS, the next set of border draws will overwrite that part anyway */
-		C2D_DrawRectSolid(this->x, this->y, this->z, this->w, this->h, this->slots[1]);
-	}
-	/* and lastly draw border */
-	/** MAP:
-	 * O  B
-	 *  |---|
-	 * A|   | C
-	 *  |---|
-	 *    D
-	 */
-	/* A */ C2D_DrawLine(this->x , this->y , this->slots[0], this->x , this->oy, this->slots[0], BORDER_THICKNESS, this->z);
-	/* B */ C2D_DrawLine(this->x , this->y , this->slots[0], this->ox, this->y , this->slots[0], BORDER_THICKNESS, this->z);
-	/* C */ C2D_DrawLine(this->ox, this->oy, this->slots[0], this->ox, this->y , this->slots[0], BORDER_THICKNESS, this->z);
-	/* D */ C2D_DrawLine(this->x , this->oy, this->slots[0], this->ox, this->oy, this->slots[0], BORDER_THICKNESS, this->z);
-	
-	return true;
+	panic_assert(t == on_change, "expected ::on_change");
+	this->on_change_cb = cb;
 }
 
-bool ui::CheckBox::status()
+bool ui::CheckBox::render(ui::Keys& keys)
 {
-	return (this->flags & ui::CheckBox::CHECKED) != 0;
+	/* the checkbox may get pressed here */
+	if(ui::is_touched(keys) && keys.touch.px >= this->x && keys.touch.px <= this->ox &&
+			keys.touch.py >= this->y && keys.touch.py <= this->oy)
+	{
+		this->flags ^= ui::CheckBox::CHECKED;
+		this->on_change_cb(!!(this->flags & ui::CheckBox::CHECKED));
+		ui::set_touch_lock(keys);
+	}
+
+	/** checkbox map:
+	 * (x,y)   B (x+w,y)
+	 *  |---------|
+	 * A|         | C
+	 *  |---------|
+	 * (x,y+h) D (x+w,y+h)
+	 */
+	C2D_DrawRectSolid(this->x, this->y, this->z, this->w, this->h, this->slots[0]);
+	ui::background_rect(this->screen, this->x + BORDER_THICKNESS, this->y + BORDER_THICKNESS, this->z, this->w - BORDER_THICKNESS2, this->h - BORDER_THICKNESS2);
+
+	if(this->flags & ui::CheckBox::CHECKED)
+	{
+		float ymid = (this->y+this->oy)/2;
+		float xmid = (this->x+this->ox)/2;
+
+		/* draw an actual check, a little outside the reported bounds from width() and height() but that's fine */
+		C2D_DrawLine(this->x - 2.0f, ymid - 1.0f, this->slots[1], xmid, this->oy - 1.0f, this->slots[1], 2.0f, this->z);
+		C2D_DrawLine(xmid, this->oy - 1.0f, this->slots[1], this->ox + 2.0f, this->y - 2.0f, this->slots[1], 2.0f, this->z);
+	}
+
+	return true;
 }
 
 float ui::CheckBox::height()

@@ -23,6 +23,7 @@
 
 #include <widgets/meta.hh>
 
+#include <algorithm>
 #include <vector>
 
 #include "lumalocale.hh"
@@ -72,11 +73,14 @@ void queue_process_all()
 {
 	Result res = ctr::lockNDM();
 	bool hasLock = R_SUCCEEDED(res);
+	size_t i;
 	if(!hasLock) elog("failed to acquire NDM lock: %08lX", res);
 
 	struct errvec {
 		Result res;
 		hsapi::FullTitle *meta;
+		bool operator == (const hsapi::FullTitle& other)
+		{ return other.id == this->meta->id; }
 	};
 	std::vector<errvec> errs;
 	enum PostProcFlag {
@@ -85,26 +89,27 @@ void queue_process_all()
 		WARN_FILE  = 2,
 		SET_PATCH  = 4,
 	}; int procflag = NONE;
-	for(hsapi::FullTitle& meta : g_queue)
+	for(i = 0; i < g_queue.size(); ++i)
 	{
-		ilog("Processing title with id=%llu", meta.id);
-		res = install::gui::hs_cia(meta, false);
+		ilog("Processing title with id=%llu", g_queue[i].id);
+		res = install::gui::hs_cia(g_queue[i], false, false, PSTRING(installing_game_x_of_y,
+			hsapi::title_name(g_queue[i]), i + 1, g_queue.size()));
 		ilog("Finished processing, res=%016lX", res);
 		if(R_FAILED(res))
 		{
 			errvec ev;
-			ev.res = res; ev.meta = &meta;
+			ev.res = res; ev.meta = &g_queue[i];
 			errs.push_back(ev);
 			if(res == APPERR_CANCELLED)
 				break; /* finished */
 		}
 		else
 		{
-			if(luma::set_locale(meta.tid))
+			if(luma::set_locale(g_queue[i].tid, false))
 				procflag |= SET_PATCH;
-			if(meta.cat == THEMES_CATEGORY)
+			if(g_queue[i].cat == THEMES_CATEGORY)
 				procflag |= WARN_THEME;
-			else if(meta.flags & hsapi::TitleFlag::installer)
+			else if(g_queue[i].flags & hsapi::TitleFlag::installer)
 				procflag |= WARN_FILE;
 		}
 	}
@@ -115,7 +120,7 @@ void queue_process_all()
 
 	if(errs.size() != 0)
 	{
-		ui::LED::ClearTimeout();
+		ui::LED::ClearResetFlags();
 		install::gui::ErrorLED();
 		if(hasLock) ctr::unlockNDM();
 
@@ -128,13 +133,20 @@ void queue_process_all()
 	}
 	else
 	{
-		ui::LED::ClearTimeout();
+		ui::LED::ClearResetFlags();
 		install::gui::SuccessLED();
 		if(hasLock) ctr::unlockNDM();
 	}
 
-	/* TODO: Only clear successful installs */
-	queue_clear();
+	/* i is the amount of installs processed */
+	for(size_t j = 0, k = 0; k < i; ++k)
+	{
+		/* if g_queue[j] not in errs, advance the queue iterator */
+		if(std::find(errs.begin(), errs.end(), g_queue[j]) != errs.end())
+			++j;
+		/* else if succeeded, remove it from the queue and don't advance queue iterator since the next element is at j */
+		else queue_remove(j);
+	}
 }
 
 static void queue_is_empty()

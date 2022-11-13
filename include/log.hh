@@ -17,44 +17,68 @@
 #ifndef inc_log_hh
 #define inc_log_hh
 
+/* this header is a bit messed up due to c+cpp support */
+
 #include <stddef.h>
 
+#ifdef __cplusplus
+	#define LOG_CLASS_KEYWORD class
+	#define LOG_PREFIX
+	#define LOGLEVEL(name) LogLevel::name
+	#define LOG_EXTERN_C extern "C"
+#else
+	#define LOG_CLASS_KEYWORD
+	#define LOG_PREFIX LLVL_
+	#define LOGLEVEL(name) LLVL_##name
+	#define LOG_EXTERN_C
+	typedef int LogLevel;
+#endif
+#define LOGLEVEL_PREFIXED___(a,b) a##b
+#define LOGLEVEL_PREFIXED__(a,b) LOGLEVEL_PREFIXED___(a,b)
+#define LOGLEVEL_PREFIXED(name) LOGLEVEL_PREFIXED__(LOG_PREFIX, name)
 
-enum class LogLevel
+enum LOG_CLASS_KEYWORD LogLevel
 {
-	fatal    = 0,
-	error    = 1,
-	warning  = 2,
-	info     = 3,
-	debug    = 4,
-	verbose  = 5,
+	LOGLEVEL_PREFIXED(fatal)    = 0,
+	LOGLEVEL_PREFIXED(error)    = 1,
+	LOGLEVEL_PREFIXED(warning)  = 2,
+	LOGLEVEL_PREFIXED(info)     = 3,
+	LOGLEVEL_PREFIXED(debug)    = 4,
+	LOGLEVEL_PREFIXED(verbose)  = 5,
 };
 
-__attribute__((format(printf, 5, 6)))
+LOG_EXTERN_C __attribute__((format(printf, 5, 6)))
 void _logf(const char *fnname, const char *filen,
 	size_t line, LogLevel lvl, const char *fmt, ...);
 
+#ifdef __cplusplus
 const char *log_filename();
 void log_delete_invalid();
 void log_flush();
 void log_init();
 void log_exit();
 void log_del();
-
-#ifdef RELEASE
-	/* inlined check so compiler can optimize it out entirely */
-	#define l__log(l, ...) if(l <= LogLevel::info) \
-		_logf(__func__, NULL, __LINE__, l, __VA_ARGS__)
-#else
-	#define l__log(l, ...) _logf(__func__, __FILE__, __LINE__, l, __VA_ARGS__)
 #endif
 
-#define elog(...) l__log(LogLevel::error, __VA_ARGS__)
-#define flog(...) l__log(LogLevel::fatal, __VA_ARGS__)
-#define wlog(...) l__log(LogLevel::warning, __VA_ARGS__)
-#define ilog(...) l__log(LogLevel::info, __VA_ARGS__)
-#define dlog(...) l__log(LogLevel::debug, __VA_ARGS__)
-#define vlog(...) l__log(LogLevel::verbose, __VA_ARGS__)
+#ifdef RELEASE
+	#ifdef FULL_LOG
+		#define l__log(l, ...) _logf(__func__, NULL, __LINE__, l, __VA_ARGS__)
+	#else
+		/* inlined check so compiler can optimize it out entirely */
+		#define l__log(l, ...) if(l <= LOGLEVEL(info)) \
+			_logf(__func__, NULL, __LINE__, l, __VA_ARGS__)
+	#endif
+#else
+	#define l__log(l, ...) _logf(__func__, __FILE__, __LINE__, l, __VA_ARGS__)
+	#define FULL_LOG
+#endif
+
+#define elog(...) l__log(LOGLEVEL(error), __VA_ARGS__)
+#define flog(...) l__log(LOGLEVEL(fatal), __VA_ARGS__)
+#define wlog(...) l__log(LOGLEVEL(warning), __VA_ARGS__)
+#define ilog(...) l__log(LOGLEVEL(info), __VA_ARGS__)
+#define dlog(...) l__log(LOGLEVEL(debug), __VA_ARGS__)
+#define vlog(...) l__log(LOGLEVEL(verbose), __VA_ARGS__)
 
 #endif
 

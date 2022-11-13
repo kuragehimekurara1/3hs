@@ -1,5 +1,66 @@
 
-v1.2.1 "cotidie morimur":
+v1.4.0 "aequora viridia":
+ - Fix issue where an unlisted title would crash 3hs
+ - Fix issue where jumping a page in a list would skip an entry
+ - Make 3hs not remove every queue item if there was a failure, but only those that succeeded
+ - Make 3hs always display the title currently being installed
+ - Add a progress bar instead of spinner for deleting unused tickets
+ - Add feature to place the cursor at the subcategory that matches the system region
+ - Add support for the Luma3DS v11.0 configuration format
+ - Add latency graph during installation
+ - Add music support
+
+v1.3.7 "libere dorme":
+ - Fix issue preventing usage on older system versions
+ - Support product code search
+
+v1.3.6 "libere dorme":
+ - Always delete unused tickets during installation
+ - Fix crash at boot on Korean/Chinese systems
+ - Fix some text not being visible
+ - Fix manual LumaLocale mode prompt while installing from queue
+
+v1.3.5 "libere dorme":
+ - Fix some missing characters in the font like ō
+ - Make 3hs reinstall without prompt by default
+ - Add message stating progress in queue while installing therefrom
+ - Add support for alternative titles
+ - Add support for Virtual Console type
+ - Add Catalan translation
+
+v1.3.4 "libere dorme":
+ - Fix "base game not installed" message for Mii Plaza DLC (again)
+ - Fix crash when trying to access an unlisted title
+ - Add ability to preview a theme
+
+v1.3.3 "libere dorme":
+ - Make title installation use seeds from the database instead of seeddb.bin
+ - Block startup for consoles with developer ENVINFO
+ - Add menu option to delete unused tickets
+ - Add Neapolitan translation
+ - Add Macedonian translation
+ - Add Tagalog translation
+ - Add Welsh translation
+ - Update Italian translation
+ - Update Greek translation
+
+v1.3.2 "libere dorme":
+ - Fix find missing content for some users
+ - Fix inability to input complex characters on CJK systems
+ - Add theming support
+ - Add Chinese (Traditional and Simplified) translation
+ - General system stability improvements to enhance the user's experience
+
+v1.3.1 "libere dorme":
+ - Make LED turn red/green after install if lid is closed depending on success of installation
+ - Fix error "0xD8A08012" when a download was cancelled
+ - Fix demo's being detected as missing content
+ - Fix queue "install all" button being easy to accidentally press when you want to access the queue
+ - Add Japanese (Osaka dialect) translation
+ - Add Moldovan translation
+ - General system stability improvements to enhance the user's experience
+
+v1.3.0 "libere dorme":
  - Fix functionality of "find all missing"
  - Fix issue where a large queue could not be installed
  - Add ability to reset settings by pressing R on startup or R in settings
@@ -12,6 +73,8 @@ v1.2.1 "cotidie morimur":
  - Add Japanese translation
  - Add Russian translation
  - Add Spearglish (Old English) translation
+ - Add Ryukyuan translation
+ - Add Latvian translation
 
 v1.2.0 "cotidie morimur":
  - Make text wrapping not use hyphens

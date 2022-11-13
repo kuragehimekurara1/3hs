@@ -16,16 +16,18 @@
 #define MAGIC "HLT"
 #define PORT "37283"
 
-#if __BYTEORDER__ == __ORDER_LITTLE__
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 // Why do these not exist already?
 static uint64_t htonll(uint64_t n)
 { return __builtin_bswap64(n); }
 
 static uint64_t ntohll(uint64_t n)
 { return __builtin_bswap64(n); }
-#else
+#elif __BYTE_ORDER == __ORDER_BIG_ENDIAN__
 #define htonll(n) n
 #define ntohll(n) n
+#else
+#error "Unsupported endian"
 #endif
 
 typedef struct iTransactionHeader

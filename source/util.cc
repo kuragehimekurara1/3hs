@@ -18,9 +18,84 @@
 
 #include <ui/base.hh>
 
+#include "panic.hh"
 #include "util.hh"
 #include "i18n.hh"
 
+#define SLINE_MOD 0.5f
+
+
+/*     StatusLine */
+void StatusLine::reset()
+{
+	if(this->flags & 4)
+	{
+		ui::RenderQueue::global()->find_tag(ui::tag::net_indicator)->set_hidden(!!(this->flags & 1));
+		ui::RenderQueue::global()->find_tag(ui::tag::free_indicator)->set_hidden(!!(this->flags & 2));
+		this->text.destroy();
+	}
+	this->flags = 0;
+}
+
+void StatusLine::run(const std::string& str)
+{
+	this->text.setup(this->screen, str);
+	this->text->resize(0.35f, 0.35f);
+	this->text->set_raw_y(ui::screen_height() - 10.0f);
+	this->text->set_raw_x(this->lastx = this->xpos = -this->text->width() - 10.0f);
+	this->text.finalize();
+
+	ui::BaseWidget *w = ui::RenderQueue::global()->find_tag(ui::tag::net_indicator);
+	w->set_hidden(true);
+	this->flags = w->is_hidden() ? 0 : 1;
+
+	w = ui::RenderQueue::global()->find_tag(ui::tag::free_indicator);
+	w->set_hidden(true);
+	this->flags |= w->is_hidden() ? 0 : 2;
+
+	this->flags |= 4;
+}
+
+bool StatusLine::render(ui::Keys& keys)
+{
+	/* 4 = is running */
+	if(!(this->flags & 4))
+		return true;
+
+	this->text->render(keys);
+
+	/* 8 = is in position; wait 3 seconds */
+	if(this->flags & 8)
+	{
+		if(time(NULL) - this->in_pos_start > 3)
+		{
+			this->flags &= ~8;
+			this->flags |= 16;
+		}
+	}
+	/* 16 = return in progress; return to -this->text->width() - 10.0f */
+	else if(this->flags & 16)
+	{
+		this->xpos -= SLINE_MOD;
+		this->text->set_raw_x(this->xpos);
+		/* finished */
+		if(this->xpos < this->lastx)
+			this->reset();
+	}
+	/* else we must progress to 5.0f */
+	else
+	{
+		this->xpos += SLINE_MOD;
+		this->text->set_raw_x(this->xpos);
+		if(this->xpos > 5.0f)
+		{
+			this->in_pos_start = time(NULL);
+			this->flags |= 8;
+		}
+	}
+	return true;
+}
+/* end StatusLine */
 
 bool set_focus(bool focus)
 {
@@ -41,6 +116,21 @@ std::string set_desc(const std::string& nlabel)
 	std::string old = action->get_text();
 	action->set_text(nlabel);
 	return old;
+}
+
+void set_status(const std::string& text)
+{
+	StatusLine *sl = ui::RenderQueue::global()->find_tag<StatusLine>(ui::tag::status);
+	panic_assert(sl, "status line not set up");
+	sl->reset();
+	sl->run(text);
+}
+
+void reset_status()
+{
+	StatusLine *sl = ui::RenderQueue::global()->find_tag<StatusLine>(ui::tag::status);
+	panic_assert(sl, "status line not set up");
+	sl->reset();
 }
 
 void lower(std::string& s)

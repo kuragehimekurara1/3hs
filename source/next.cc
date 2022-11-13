@@ -20,6 +20,7 @@
 #include <ui/list.hh>
 #include <ui/base.hh>
 
+#include <algorithm>
 #include <ctype.h>
 
 #include "hsapi.hh"
@@ -27,6 +28,7 @@
 #include "panic.hh"
 #include "i18n.hh"
 #include "util.hh"
+#include "ctr.hh"
 
 
 const std::string *next::sel_cat(size_t *cursor)
@@ -70,7 +72,7 @@ const std::string *next::sel_cat(size_t *cursor)
 	return ret;
 }
 
-const std::string *next::sel_sub(const std::string& cat, size_t *cursor)
+const std::string *next::sel_sub(const std::string& cat, size_t *cursor, bool visited)
 {
 	using list_t = ui::List<hsapi::Subcategory>;
 
@@ -106,7 +108,28 @@ const std::string *next::sel_sub(const std::string& cat, size_t *cursor)
 		.x(5.0f).y(25.0f)
 		.add_to(&list, queue);
 
-	if(cursor != nullptr) list->set_pos(*cursor);
+	if(visited && cursor != nullptr) list->set_pos(*cursor);
+	else if(ISET_GOTO_REGION)
+	{
+		const char *scname;
+		switch(ctr::get_system_region())
+		{
+		case CFG_REGION_AUS: scname = "australia"; break;
+		case CFG_REGION_EUR: scname = "europe"; break;
+		case CFG_REGION_CHN: scname = "china"; break;
+		case CFG_REGION_JPN: scname = "japan"; break;
+		case CFG_REGION_KOR: scname = "korea"; break;
+		case CFG_REGION_TWN: scname = "taiwan"; break;
+		case CFG_REGION_USA: scname = "north-america"; break;
+		default: scname = NULL; break;
+		}
+		if(scname)
+		{
+			auto cat = std::find_if(rcat->subcategories.begin(), rcat->subcategories.end(), [scname](const hsapi::Subcategory& sc) -> bool { return sc.name == scname; });
+			if(cat != rcat->subcategories.end())
+				list->set_pos(std::distance(rcat->subcategories.begin(), cat));
+		}
+	}
 	queue.render_finite();
 	if(cursor != nullptr) *cursor = list->get_pos();
 
@@ -166,7 +189,7 @@ static sort_callback<hsapi::Title> get_sort_callback(SortDirection dir, SortMeth
 		}
 		break;
 	}
-	/* how does this happen, all i know is it does */
+	/* how does this happen?! all i know is it does */
 	fix_sort_settings();
 	return sort_alpha_asc;
 //	panic("invalid sort method/direction");
@@ -194,7 +217,7 @@ hsapi::hid next::sel_gam(std::vector<hsapi::Title>& titles, size_t *cursor)
 		.add_to(&meta, queue);
 
 	ui::builder<list_t>(ui::Screen::top, &titles)
-		.connect(list_t::to_string, [](const hsapi::Title& title) -> std::string { return title.name; })
+		.connect(list_t::to_string, [](const hsapi::Title& title) -> std::string { return hsapi::title_name(title); })
 		.connect(list_t::select, [&ret](list_t *self, size_t i, u32 kDown) -> bool {
 			ret = self->at(i).id;
 			if(kDown & KEY_B) ret = next_gam_back;

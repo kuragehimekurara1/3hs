@@ -17,7 +17,6 @@
 #ifndef inc_error_hh
 #define inc_error_hh
 
-#include <string>
 #include <3ds.h>
 
 #define APPERR_NOSUPPORT MAKERESULT(RL_PERMANENT, RS_NOTSUPPORTED, RM_APPLICATION, 0)
@@ -32,7 +31,12 @@
 #define APPERR_API_FAIL MAKERESULT(RL_PERMANENT, RS_INVALIDSTATE, RM_APPLICATION, 9)
 #define APPERR_TOO_LARGE MAKERESULT(RL_PERMANENT, RS_INVALIDSTATE, RM_APPLICATION, 10)
 #define APPERR_FILEFWD_FAIL MAKERESULT(RL_PERMANENT, RS_INTERNAL, RM_APPLICATION, 11)
+#define APPERR_TITLE_UNLISTED MAKERESULT(RL_PERMANENT, RS_INVALIDSTATE, RM_APPLICATION, 12)
+#define APPERR_OUT_OF_MEM MAKERESULT(RL_TEMPORARY, RS_OUTOFRESOURCE, RM_APPLICATION, 13)
+#define APPERR_INCOMPATIBLE_FONT MAKERESULT(RL_PERMANENT, RS_INVALIDSTATE, RM_APPLICATION, 14)
 
+#ifdef __cplusplus
+#include <string>
 
 typedef struct error_container
 {
@@ -57,6 +61,7 @@ void report_error(error_container& container, std::string note = "");
 std::string format_err(const std::string& msg, Result code);
 error_container get_error(Result res);
 std::string pad8code(Result code);
+#endif
 
 #endif
 

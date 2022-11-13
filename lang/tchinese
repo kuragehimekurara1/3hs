@@ -153,10 +153,10 @@ hShop ID
 此項目不存在: %1
 
 # %1 = error code
-# $t = seconds remaining
+# %2 = seconds remaining
 - netcon_lost
 連線丟失 (%1)。
- $t 秒後重試...
+ %2 秒後重試...
 
 # nowrap, burger (three lines) menu entry
 - about_app
@@ -426,12 +426,8 @@ Luma3DS 修補檔已生效。
 %1
 
 # Nintendo blocks, use official Nintendo translation if available
-- block
-格
-
-# see above, just in plural this time
-- blocks
-格
+- size_plus_block
+%1 (%2 格)
 
 # nowrap, search menu item
 - search_text
@@ -546,3 +542,77 @@ Title ID 搜尋
 根據本機的 ENVINFO，這可能是一部 3DS 開發機。
 3hs 將不會在此系統上正確運行。
 如果你的 3DS 確實是常規機型，請去 Luma3DS 設置中停用 "Enable developer UNITINFO"。
+
+# nowrap, used in for examples language select
+- hint_navigate
+UI_GLYPH_DPAD_CLEAR/UI_GLYPH_CPAD: 導航
+
+# %1 = theme author
+- made_by
+由 %1
+
+# nowrap, burger menu item
+- themes
+主題
+
+# nowrap, burger menu item
+- delete_unused_tickets
+刪除未使用的票
+
+# asking user if they want to delete unused tickets, %1 = amount of unused tickets that were found
+- found_unused_tickets
+找到 %1 個未使用的票證。 你想刪除它們嗎？
+
+# informing user that no missing tickets were found
+- found_no_unused_tickets
+沒有找到未使用的票。
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+從服務器獲取的主題預覽無效！
+
+# hinting the user to press Y to add to queue in extmeta
+- hint_add_queue
+UI_GLYPH_Y: 添加到隊列
+
+# # hinting the user to press X to preview theme in extmeta if category is themes
+- hint_preview_theme
+UI_GLYPH_X: 預覽主題
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+備用名稱
+
+# setting title
+- show_alt
+顯示替代名稱
+
+# setting description
+- show_alt_desc
+顯示替代名稱（如果有）。
+
+# setting title
+- default_reinst
+默認重新安裝
+
+# setting description
+- default_reinst_desc
+默認重新安裝； 不要明確要求刪除已安裝的標題。
+
+# shown while installing a queue on the other screen
+#  %1 = current game title
+#  %2 = total titles
+#  %3 = current position in the queue
+- installing_game_x_of_y
+處理隊列：%2/%3
+%1
+
+- no_other_params_prod
+指定產品代碼時無法指定任何其他參數
+
+- invalid_prod
+產品代碼無效
+
+- search_prod
+按產品代碼搜索
+

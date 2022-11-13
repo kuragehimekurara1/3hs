@@ -14,15 +14,12 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_FAILURE_USERMSG
-#include "./stb_image.h"
+#include "../3rd/3rd/stb_image.h"
 
 typedef uint32_t u32;
 typedef uint16_t u16;
 typedef uint8_t  u8;
 
-#ifndef __BYTE_ORDER__
-	#error "__BYTE_ORDER__ is not defined!"
-#endif
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	#define U16(a) (__builtin_bswap16(a))
 	#define U32(a) (__builtin_bswap32(a))
@@ -73,7 +70,7 @@ bool dynbuf_cpy_alloc(struct dynbuf *blob, void *data, u32 len)
 	u32 npos = blob->pos + len;
 	if(npos >= blob->size)
 	{
-		blob->size += npos;
+		blob->size += len;
 		blob->size *= 2;
 		blob->data = realloc(blob->data, blob->size);
 		if(!blob->data) return false;
@@ -130,6 +127,8 @@ static int make_hstx_impl(FILE *out, char *in_buf, struct dynbuf *blob, const ch
 		ID_SMDH_BORDER_CLR   = 0x1015,
 		ID_CHKBX_BORDER_CLR  = 0x1016,
 		ID_CHKBX_CHK_CLR     = 0x1017,
+		ID_GRAPH_LINE_CLR    = 0x1018,
+		ID_WARN_CLR          = 0x1019,
 
 		ID_MORE_IMG          = 0x2001,
 		ID_BATTERY_IMG       = 0x2002,
@@ -247,24 +246,26 @@ static int make_hstx_impl(FILE *out, char *in_buf, struct dynbuf *blob, const ch
 		} \
 		++num_descriptors; \
 	}
-		DEFCDESC("background_color", ID_BG_CLR)
-		DEFCDESC("text_color", ID_TEXT_CLR)
-		DEFCDESC("button_background_color", ID_BTN_BG_CLR)
-		DEFCDESC("button_border_color", ID_BTN_BORDER_CLR)
-		DEFCDESC("battery_good_color", ID_BATTERY_GREEN_CLR)
-		DEFCDESC("battery_bad_color", ID_BATTERY_RED_CLR)
-		DEFCDESC("toggle_enabled_color", ID_TOGGLE_GREEN_CLR)
-		DEFCDESC("toggle_disabled_color", ID_TOGGLE_RED_CLR)
-		DEFCDESC("toggle_slider_color", ID_TOGGLE_SLID_CLR)
-		DEFCDESC("progress_bar_foreground_color", ID_PROGBAR_FG_CLR)
-		DEFCDESC("progress_bar_background_color", ID_PROGBAR_BG_CLR)
-		DEFCDESC("scrollbar_color", ID_SCROLLBAR_CLR)
+		DEFCDESC("background_colour", ID_BG_CLR)
+		DEFCDESC("text_colour", ID_TEXT_CLR)
+		DEFCDESC("button_background_colour", ID_BTN_BG_CLR)
+		DEFCDESC("button_border_colour", ID_BTN_BORDER_CLR)
+		DEFCDESC("battery_good_colour", ID_BATTERY_GREEN_CLR)
+		DEFCDESC("battery_bad_colour", ID_BATTERY_RED_CLR)
+		DEFCDESC("toggle_enabled_colour", ID_TOGGLE_GREEN_CLR)
+		DEFCDESC("toggle_disabled_colour", ID_TOGGLE_RED_CLR)
+		DEFCDESC("toggle_slider_colour", ID_TOGGLE_SLID_CLR)
+		DEFCDESC("progress_bar_foreground_colour", ID_PROGBAR_FG_CLR)
+		DEFCDESC("progress_bar_background_colour", ID_PROGBAR_BG_CLR)
+		DEFCDESC("scrollbar_colour", ID_SCROLLBAR_CLR)
 		DEFCDESC("led_success", ID_LED_GREEN_CLR)
 		DEFCDESC("led_failure", ID_LED_RED_CLR)
-		DEFCDESC("checkbox_border_color", ID_CHKBX_BORDER_CLR)
-		DEFCDESC("checkbox_check_color", ID_CHKBX_CHK_CLR)
+		DEFCDESC("checkbox_border_colour", ID_CHKBX_BORDER_CLR)
+		DEFCDESC("checkbox_check_colour", ID_CHKBX_CHK_CLR)
+		DEFCDESC("graph_line_colour", ID_GRAPH_LINE_CLR)
+		DEFCDESC("warning_colour", ID_WARN_CLR)
 		/* */
-		DEFCDESC("smdh_icon_border_color", ID_SMDH_BORDER_CLR)
+		DEFCDESC("smdh_icon_border_colour", ID_SMDH_BORDER_CLR)
 		DEFIDESC("more_image", ID_MORE_IMG)
 		DEFIDESC("battery_image", ID_BATTERY_IMG)
 		DEFIDESC("search_image", ID_SEARCH_IMG)

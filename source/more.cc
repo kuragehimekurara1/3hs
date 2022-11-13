@@ -19,6 +19,8 @@
 #include "hlink/hlink_view.hh"
 
 #include "find_missing.hh"
+#include "audio_cfg.hh"
+#include "sysmanage.hh"
 #include "log_view.hh"
 #include "settings.hh"
 #include "hsapi.hh"
@@ -33,17 +35,6 @@
 #include <stdlib.h>
 
 
-enum MoreInds {
-	IND_ABOUT = 0,
-	IND_FIND_MISSING,
-	IND_LOG,
-#ifndef RELEASE
-	IND_HLINK,
-#endif
-	IND_MAX
-};
-
-
 void show_more()
 {
 	bool focus = set_focus(true);
@@ -54,6 +45,8 @@ void show_more()
 		.connect(ui::MenuSelect::add, STRING(find_missing_content), []() -> bool { show_find_missing_all(); return true; })
 		.connect(ui::MenuSelect::add, STRING(log), []() -> bool { show_logs_menu(); return true; })
 		.connect(ui::MenuSelect::add, STRING(themes), []() -> bool { show_theme_menu(); return true; })
+		.connect(ui::MenuSelect::add, STRING(delete_unused_tickets), []() -> bool { show_delete_unused_tickets(); return true; })
+		.connect(ui::MenuSelect::add, STRING(audio), []() -> bool { show_audio_config(); return true; })
 #ifndef RELEASE
 		.connect(ui::MenuSelect::add, "hLink", []() -> bool { show_hlink(); return true; })
 #endif

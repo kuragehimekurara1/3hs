@@ -117,7 +117,7 @@ hShop ID
 
 - netcon_lost
 ネットワーク接続ぬ失らりやびたん(%1)。
-$t秒っし再試行さびーん。..
+%2秒っし再試行さびーん。..
 
 - about_app
 3hsぬ詳細
@@ -324,11 +324,8 @@ LumaLocaleオートセッターぬモード設定さびーん。 自動ー言語
 くぬID使用しサポート取得さびーん：
 %1
 
-- block
-ブロック
-
-- blocks
-ブロック
+- size_plus_block
+%1 (%2 ブロック)
 
 - search_text
 テキストっし検索
@@ -427,4 +424,60 @@ UI_GLYPH_DPAD_CLEAR/UI_GLYPH_CPAD: ナビゲート
 くぬコンソールぬENVINFOんかいゆいねー、くれー開発ユニットやいびーん。
 くぬシステムっしぇー3hsー正しく機能さびらん。
 リテール3DS使用そーるばーや、Luma3DS構成ぬ「Enable developer UNITINFO」が無効なとーるくとぅ確認しくぃみそーれー。
+
+- delete_unused_tickets
+未使用ぬチケット削除すん
+
+- found_unused_tickets
+未使用ぬチケットぬ％1見ちかやびたん。 すりら削除さびーが？
+
+- found_no_unused_tickets
+未使用ぬチケットー見ちかやびらんたん。
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+サーバーから取得さるテーマぬプレビューぬ無効やいびーん!
+
+- hint_add_queue
+UI_GLYPH_Y: キューんかい追加
+
+- hint_preview_theme
+UI_GLYPH_X: テーマのプレビュー
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+代替名
+
+# setting title
+- show_alt
+別名表示
+
+# setting description
+- show_alt_desc
+利用可能なばーや、代替名表示さびーん。
+
+# setting title
+- default_reinst
+デフォルトっし再インストール
+
+# setting description
+- default_reinst_desc
+デフォルトっし再インストールさびーん。 しでぃにインストールさりとーるタイトルぬ削除明示的に要求さんぐーとぅーくぃみそーれー。
+
+# shown while installing a queue on the other screen
+#  %1 = current game title
+#  %2 = total titles
+#  %3 = current position in the queue
+- installing_game_x_of_y
+処理キュー: %2/%3
+%1
+
+- no_other_params_prod
+あちねーむんコード指定時に他ぬパラメーター指定なやびらん
+
+- invalid_prod
+製品コードぬ無効やいびーん
+
+- search_prod
+あちねーむんコードからかめーいん
 

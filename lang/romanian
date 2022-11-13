@@ -89,10 +89,10 @@ Mod luminos
 Reluați descărcările
 
 - load_space
-Afişați indicator de spațiu liber
+Afișați indicator de spațiu liber
 
 - show_battery
-Afişați indicator de baterie
+Afișați indicator de baterie
 
 - time_format
 Format de timp
@@ -117,7 +117,7 @@ Titlul nu există: %1
 
 - netcon_lost
 Conexiunea la internet s-a pierdut (%1).
-Se va reîncerca în $t secunde...
+Se va reîncerca în %2 secunde...
 
 - about_app
 Despre
@@ -129,13 +129,13 @@ Ajutor/Manual
 Găsiți conținut lipsă
 
 - press_a_exit
-Apăsați UI_GLYPH_A pentru a ieşi.
+Apăsați UI_GLYPH_A pentru a ieși.
 
 - fatal_panic
 O panică fatală a avut loc.
 
 - failed_open_seeddb
-Deschiderea seeddb.bin a eşuat.
+Deschiderea seeddb.bin a eșuat.
 
 - update_to
 Vreți să actualizați la %1?
@@ -159,7 +159,7 @@ Sumar: %1
 Modul: %1
 
 - hs_bunny_found
-Felicitări! Ai găsit iepuraşul hShop!
+Felicitări! Ai găsit iepurașul hShop!
 
 - already_installed_reinstall
 Titlu deja instalat. Reinstalați?
@@ -194,7 +194,7 @@ manual
 oprit
 
 - patching_reboot
-Luma3DS Game Patching este acum pornit.
+Luma3DS game patching este acum pornit.
 Sistemul trebuie repornit
 pentru ca această schimbare să aibă efect.
 
@@ -205,7 +205,7 @@ Reporniți acum?
 Acesta este 3hs versiunea %1
 
 - retry_req
-Cerere eşuată. Reîncercați?
+Cerere eșuată. Reîncercați?
 
 - search_zero_results
 Căutarea dvs. nu a dat rezultate.
@@ -261,10 +261,10 @@ Porniți/opriți modul luminos. Acesta va schimba felul în care arată majorita
 Reluați descărcările după o întrerupere de rețea.
 
 - load_space_desc
-Afişați indicatorul de progres.
+Afișați indicatorul de progres.
 
 - show_battery_desc
-Afişați indicatorul de baterie.
+Afișați indicatorul de baterie.
 
 - time_format_desc
 Selectați formatul orar.
@@ -285,13 +285,13 @@ Configurați un server proxy pentru 3hs. Această setare este pentru utilizatori
 Instalați tot
 
 - install_no_base
-Jocul de bază nu este instalat. Continuați totuşi?
+Jocul de bază nu este instalat. Continuați totuși?
 
 - warn_no_base
 Avertizează dacă un joc de bază nu a fost instalat
 
 - warn_no_base_desc
-Afişează un mesaj înainte de a instala un conținut de actualizare sau DLC dacă jocul de bază nu este instalat.
+Afișează un mesaj înainte de a instala un conținut de actualizare sau DLC dacă jocul de bază nu este instalat.
 
 - replaying_errors
 Se reiau erori apărute în timpul procesării cozii.
@@ -303,7 +303,7 @@ Registre
 Încărcați registre
 
 - clear_logs
-Ştergeți registre
+ștergeți registre
 
 - found_missing
 S-au găsit %1 titluri care lipsesc
@@ -316,20 +316,18 @@ Niciun titlu lipsă nu a fost găsit.
 Numărul maxim de registre vechi
 
 - max_elogs_desc
-Setați numărul de registre pe care să le țineți. Valorile posibile sunt de la 0 la 255, unde 0 nu reține niciun fişier de registru.
+Setați numărul de registre pe care să le țineți. Valorile posibile sunt de la 0 la 255, unde 0 nu reține niciun fișier de registru.
 
 - elogs_hint
-Valoare între 0 şi 255
+Valoare între 0 și 255
 
 - log_id
 Folosiți acest ID pentru a obține suport:
 %1
 
-- block
-bloc
-
-- blocks
-blocuri
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 bloc)";
+else       return "%1 (%2 blocuri)";
 
 - search_text
 Căutați după text
@@ -353,7 +351,7 @@ Introduceți termeni pentru căutarea clasică
 Nu se poate specifica nici un alt parametru când specificați un ID de titlu
 
 - both_sd_and_sb
-Trebuie să specificați o metodă de sortare şi o direcție de sortare când sortați rezultatele căutării
+Trebuie să specificați o metodă de sortare și o direcție de sortare când sortați rezultatele căutării
 
 - invalid_sb
 Metodă de sortare invalidă
@@ -434,4 +432,59 @@ de %1
 
 - themes
 Teme
+
+- delete_unused_tickets
+Ștergeți tichetele nefolosite
+
+- found_unused_tickets
+%1 tichete nefolosite au fost găsite. Doriți să le ștergeți?
+
+- found_no_unused_tickets
+Niciun tichet nefolosit nu a fost găsit.
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+Previzualizare de temă invalidă!
+
+- hint_add_queue
+UI_GLYPH_Y: adaugați la coadă
+
+- hint_preview_theme
+UI_GLYPH_X: previzualizați tema
+
+- alt_name
+Nume alternativ
+
+# setting title
+- show_alt
+Afișați nume alternativ
+
+# setting description
+- show_alt_desc
+Afișați nume alternativ, dacă este disponibil.
+
+# setting title
+- default_reinst
+Reinstalați implicit
+
+# setting description
+- default_reinst_desc
+Reinstalați implicit; nu întreba explicit dacă să se șteargă un titlu existent.
+
+# shown while installing a queue on the other screen
+#  %1 = current game title
+#  %2 = total titles
+#  %3 = current position in the queue
+- installing_game_x_of_y
+Processing queue: %2/%3
+%1
+
+- no_other_params_prod
+Nu se pot introduce alți parametri când introduceți un cod de produs
+
+- invalid_prod
+Cod de produs invalid
+
+- search_prod
+Căutați după cod de produs
 

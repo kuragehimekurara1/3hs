@@ -26,7 +26,7 @@ static const u32 konKeys[] = {
 };
 
 
-bool ui::KonamiListner::render(const ui::Keys& keys)
+bool ui::KonamiListner::render(ui::Keys& keys)
 {
 	if(this->currKey == KONCODE_SIZE)
 	{

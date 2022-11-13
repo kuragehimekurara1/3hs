@@ -117,7 +117,7 @@ Az alábbi letöltés nem létezik: %1
 
 - netcon_lost
 Megszakadt az internet kapcsolat (%1).
-Újrakapcsolódás $t másodpercen belül...
+Újrakapcsolódás %2 másodpercen belül...
 
 - about_app
 A szoftverről
@@ -194,7 +194,7 @@ manuális
 kikapcsol
 
 - patching_reboot
-A Luma3DS Game Patching be lett kapcsolva.
+A Luma3DS game patching be lett kapcsolva.
 A változtatások véglegesítéséhez a rendszer újraindítása szükséges.
 
 - reboot_now
@@ -324,11 +324,8 @@ Egy érték 0 és 255 között
 Az alábbi ID számra hivatkozva tudsz segítséget kérni:
 %1
 
-- block
-blokk
-
-- blocks
-blokk
+- size_plus_block
+%1 (%2 blokk)
 
 - search_text
 Keresés szöveg alapján
@@ -433,3 +430,27 @@ Készítette: %1
 # nowrap, burger menu item
 - themes
 Kinézetek
+
+# nowrap, burger menu item
+- delete_unused_tickets
+Nem használt ticketek eltávolítása
+
+# asking user if they want to delete unused tickets, %1 = amount of unused tickets that were found
+- found_unused_tickets
+A keresés %1 nem használt ticket(ek)et talált. Eltávolítsa?
+
+# informing user that no missing tickets were found
+- found_no_unused_tickets
+A keresés nem talált használaton kívül lévő ticketeket.
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+Az előnézet betöltése sikertelen volt.
+
+# hinting the user to press Y to add to queue in extmeta
+- hint_add_queue
+UI_GLYPH_Y: Várólistához adás
+
+# hinting the user to press X to preview theme in extmeta if category is themes
+- hint_preview_theme
+UI_GLYPH_X: Előnézet megtekintése

@@ -33,7 +33,7 @@ namespace ui
 		float get_x() override;
 		float get_y() override;
 
-		bool render(const ui::Keys& keys) override;
+		bool render(ui::Keys& keys) override;
 		float height() override;
 		float width() override;
 
@@ -54,7 +54,7 @@ namespace ui
 		float get_x() override;
 		float get_y() override;
 
-		bool render(const ui::Keys& keys) override;
+		bool render(ui::Keys& keys) override;
 		float height() override;
 		float width() override;
 
@@ -75,7 +75,7 @@ namespace ui
 		float get_x() override;
 		float get_y() override;
 
-		bool render(const ui::Keys& keys) override;
+		bool render(ui::Keys& keys) override;
 		float height() override;
 		float width() override;
 

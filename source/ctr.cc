@@ -33,6 +33,30 @@ static inline FS_Path makebin_(const void *path, u32 size)
 	return { PATH_BINARY, size, path };
 }
 
+static Result AM_GetTicketInfo(u32 *count, u32 amount, u64 title_id, u32 offset, AM_TicketEntry *infos)
+{
+	u32 *cmdbuf = getThreadCommandBuffer();
+
+	cmdbuf[0] = IPC_MakeHeader(0x820, 4, 2);
+	cmdbuf[1] = amount;
+	cmdbuf[2] = (u32)title_id;
+	cmdbuf[3] = (u32)((title_id >> 32) & 0xFFFFFFFF);
+	cmdbuf[4] = offset;
+	cmdbuf[5] = IPC_Desc_Buffer(amount * sizeof(AM_TicketEntry), IPC_BUFFER_W);
+	cmdbuf[6] = (u32)infos;
+
+	Result ret;
+	if (R_FAILED(ret = svcSendSyncRequest(*amGetSessionHandle())))
+		return ret;
+
+	ret = cmdbuf[1];
+
+	if (R_SUCCEEDED(ret) && count)
+		*count = cmdbuf[2];
+
+	return ret;
+}
+
 ctr::TitleSMDH *ctr::smdh::get(u64 tid)
 {
 	static const u32 smdhPath[5] = AEXEFS_SMDH_PATH;
@@ -139,6 +163,26 @@ Result ctr::list_titles_on(FS_MediaType media, std::vector<u64>& ret)
 	return res;
 }
 
+Result ctr::list_tickets(std::vector<u64>& ret)
+{
+	Result res;
+	u32 count, read;
+
+	if(R_FAILED(res = AM_GetTicketCount(&count)))
+		return res;
+
+	u64 *ticket_tids = new u64[count];
+	if(R_FAILED(res = AM_GetTicketList(&read, count, 0, ticket_tids)))
+		return res;
+
+	ret.reserve(count);
+	for(u32 i = 0; i < count; ++i)
+		ret.push_back(ticket_tids[i]);
+
+	delete [] ticket_tids;
+	return res;
+}
+
 Result ctr::get_free_space(Destination media, u64 *size)
 {
 	FS_ArchiveResource resource = { 0, 0, 0, 0 };
@@ -176,74 +220,41 @@ std::string ctr::tid_to_str(u64 tid)
 	return buf;
 }
 
+// using get info checks is way more efficient than listing everything
+
 bool ctr::title_exists(u64 tid, FS_MediaType media)
 {
-	u32 tcount = 0;
-
-	if(R_FAILED(AM_GetTitleCount(media, &tcount)))
-		return false;
-
-	u64 *tids = new u64[tcount];
-	if(R_FAILED(AM_GetTitleList(&tcount, media, tcount, tids)))
-	{
-		delete [] tids;
-		return false;
-	}
-
-	for(size_t i = 0; i < tcount; ++i)
-		if(tids[i] == tid)
-		{
-			delete [] tids;
-			return true;
-		}
-
-	delete [] tids;
-	return false;
+	AM_TitleEntry entry;
+	return R_SUCCEEDED(AM_GetTitleInfo(media, 1, &tid, &entry));
 }
 
-Result ctr::delete_title(u64 tid, FS_MediaType media)
+bool ctr::ticket_exists(u64 tid)
 {
-	Result ret = 0;
-
-	if(R_FAILED(ret = AM_DeleteTitle(media, tid))) return ret;
-	if(R_FAILED(ret = AM_DeleteTicket(tid))) return ret;
-
-	// Reloads the databases
-	if(media == MEDIATYPE_SD) ret = AM_QueryAvailableExternalTitleDatabase(NULL);
-	return ret;
+	AM_TicketEntry entry;
+	u32 count = 0;
+	return R_SUCCEEDED(AM_GetTicketInfo(&count, 1, tid, 0, &entry)) && count == 1;
 }
 
-Result ctr::delete_if_exist(u64 tid, FS_MediaType media)
+Result ctr::delete_title(u64 tid, FS_MediaType media, bool and_ticket, bool check_exist)
 {
-	if(title_exists(tid, media))
-		return delete_title(tid, media);
+	Result res = 0;
+
+	if(and_ticket && (!check_exist || ctr::ticket_exists(tid)) && R_FAILED(res = AM_DeleteTicket(tid)))
+		return res;
+
+	if((!check_exist || (ctr::title_exists(tid, media))) && R_FAILED(res = AM_DeleteTitle(media, tid)))
+		return res;
+
 	return 0;
 }
 
-bool ctr::is_base_tid(u64 tid)
+u8 ctr::get_system_region()
 {
-	u16 cat = ctr::get_tid_cat(tid);
-	/* 0x4 = AddOnContents,
-	 * which updates (0xE) and DLC (0x8C) also include
-	 * 0x8000 = DSiWare,
-	 * consider all DSiWare base. For some reason sets 0x4 for all DSiWare */
-	return (cat & 0x8000) || (cat & 0x4) == 0;
-}
-
-u64 ctr::get_base_tid(u64 tid)
-{
-	/* clear the bits of cat (2nd u16) */
-	return tid & 0xFFFF0000FFFFFFFF;
-}
-
-u16 ctr::get_tid_cat(u64 tid)
-{
-	return (tid >> 32) & 0xFFFF;
-}
-
-u32 ctr::get_tid_unique(u64 tid)
-{
-	return (tid >> 8) & 0xFFFFFF;
+	static u8 reg = CTR_REGION_UNSET;
+	if(reg == CTR_REGION_UNSET)
+		if(R_FAILED(CFGU_SecureInfoGetRegion(&reg)))
+			reg = CTR_REGION_ERROR;
+	return reg;
 }
 
 Result ctr::lockNDM()

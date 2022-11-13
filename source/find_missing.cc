@@ -75,10 +75,7 @@ ssize_t show_find_missing(hsapi::htid tid)
 		std::vector<hsapi::FullTitle> potentialInstalls;
 
 		for(size_t i = 0; i < installedGames.size(); ++i)
-		{
-			vecappend(potentialInstalls, related[installedGames[i]].updates);
-			vecappend(potentialInstalls, related[installedGames[i]].dlc);
-		}
+			vecappend(potentialInstalls, related[installedGames[i]]);
 
 		std::vector<hsapi::FullTitle> newInstalls;
 		std::copy_if(potentialInstalls.begin(), potentialInstalls.end(), std::back_inserter(newInstalls), [installed](const hsapi::FullTitle& title) -> bool {
@@ -94,7 +91,7 @@ ssize_t show_find_missing(hsapi::htid tid)
 			AM_TitleEntry te;
 			if(R_FAILED(ctr::get_title_entry(title.tid, te)))
 				return false;
-			/* installed version is lower than version on server*/
+			/* installed version is lower than version on server */
 			return title.version > te.version;
 		});
 

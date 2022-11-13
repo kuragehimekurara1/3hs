@@ -45,6 +45,7 @@ struct NewSettings {
 	u64 flags0;
 	lang::type lang;
 	u8 max_elogs;
+	u8 migration;
 	std::string theme_path;
 	u16 proxy_port;
 	std::string proxy_host;
@@ -53,22 +54,26 @@ struct NewSettings {
 };
 
 enum NewSettings_flags0 {
-	FLAG0_RESUME_DOWNLOADS = 0x1,
-	FLAG0_LOAD_FREE_SPACE  = 0x2,
-	FLAG0_SHOW_BATTERY     = 0x4,
-	FLAG0_SHOW_NET         = 0x8,
-	FLAG0_BAD_TIME_FORMAT  = 0x10,
-	FLAG0_PROGBAR_TOP      = 0x20,
-	FLAG0_LUMALOCALE0      = 0x40,
-	FLAG0_LUMALOCALE1      = 0x80,
-	FLAG0_SORTDIRECTION0   = 0x100,
-	FLAG0_SORTMETHOD0      = 0x200,
-	FLAG0_SORTMETHOD1      = 0x400,
-	FLAG0_SORTMETHOD2      = 0x800,
-	FLAG0_SORTMETHOD3      = 0x1000,
-	FLAG0_SEARCH_ECONTENT  = 0x2000,
-	FLAG0_WARN_NO_BASE     = 0x4000,
-	FLAG0_ALLOW_LED        = 0x8000,
+	FLAG0_RESUME_DOWNLOADS  = 0x1,
+	FLAG0_LOAD_FREE_SPACE   = 0x2,
+	FLAG0_SHOW_BATTERY      = 0x4,
+	FLAG0_SHOW_NET          = 0x8,
+	FLAG0_BAD_TIME_FORMAT   = 0x10,
+	FLAG0_PROGBAR_TOP       = 0x20,
+	FLAG0_LUMALOCALE0       = 0x40,
+	FLAG0_LUMALOCALE1       = 0x80,
+	FLAG0_SORTDIRECTION0    = 0x100,
+	FLAG0_SORTMETHOD0       = 0x200,
+	FLAG0_SORTMETHOD1       = 0x400,
+	FLAG0_SORTMETHOD2       = 0x800,
+	FLAG0_SORTMETHOD3       = 0x1000,
+	FLAG0_SEARCH_ECONTENT   = 0x2000,
+	FLAG0_WARN_NO_BASE      = 0x4000,
+	FLAG0_ALLOW_LED         = 0x8000,
+	FLAG0_DEFAULT_REINSTALL = 0x10000,
+	FLAG0_SHOW_ALT          = 0x20000,
+	FLAG0_DISABLE_GRAPH     = 0x40000,
+	FLAG0_GOTO_REGION       = 0x80000,
 };
 
 #define ISET_RESUME_DOWNLOADS (get_nsettings()->flags0 & FLAG0_RESUME_DOWNLOADS)
@@ -83,6 +88,10 @@ enum NewSettings_flags0 {
 #define ISET_SEARCH_ECONTENT (get_nsettings()->flags0 & FLAG0_SEARCH_ECONTENT)
 #define ISET_WARN_NO_BASE (get_nsettings()->flags0 & FLAG0_WARN_NO_BASE)
 #define ISET_ALLOW_LED (get_nsettings()->flags0 & FLAG0_ALLOW_LED)
+#define ISET_DEFAULT_REINSTALL (get_nsettings()->flags0 & FLAG0_DEFAULT_REINSTALL)
+#define ISET_SHOW_ALT (get_nsettings()->flags0 & FLAG0_SHOW_ALT)
+#define ISET_DISABLE_GRAPH (get_nsettings()->flags0 & FLAG0_DISABLE_GRAPH)
+#define ISET_GOTO_REGION (get_nsettings()->flags0 & FLAG0_GOTO_REGION)
 
 
 void reset_settings(bool set_default_lang = false);

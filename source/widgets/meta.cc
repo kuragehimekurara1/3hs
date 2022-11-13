@@ -84,7 +84,7 @@ void ui::CatMeta::set_cat(const hsapi::Category& cat)
 	clip_q(this->queue, this->get_y());
 }
 
-bool ui::CatMeta::render(const ui::Keys& keys)
+bool ui::CatMeta::render(ui::Keys& keys)
 {
 	return this->queue.render_screen(keys, this->screen);
 }
@@ -128,7 +128,7 @@ void ui::SubMeta::set_sub(const hsapi::Subcategory& sub)
 	clip_q(this->queue, this->get_y());
 }
 
-bool ui::SubMeta::render(const ui::Keys& keys)
+bool ui::SubMeta::render(ui::Keys& keys)
 {
 	return this->queue.render_screen(keys, this->screen);
 }
@@ -174,7 +174,7 @@ void ui::TitleMeta::set_title(const hsapi::Title& meta)
 	clip_q(this->queue, this->get_y());
 }
 
-bool ui::TitleMeta::render(const ui::Keys& keys)
+bool ui::TitleMeta::render(ui::Keys& keys)
 {
 	return this->queue.render_screen(keys, this->screen);
 }

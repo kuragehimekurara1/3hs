@@ -20,6 +20,17 @@
 #include <vector>
 #include <string>
 
+typedef struct AM_TicketEntry
+{
+	u64 title_id;
+	u64 ticket_id;
+	u16 version;
+	u16 padding;
+	u32 size;
+} AM_TicketEntry;
+
+#define CTR_REGION_ERROR 0xFF
+#define CTR_REGION_UNSET 0xFE
 
 namespace ctr {
 	enum Destination
@@ -104,18 +115,56 @@ namespace ctr {
 	std::string tid_to_str(u64 tid);
 
 	Result list_titles_on(FS_MediaType media, std::vector<u64>& ret);
-	Result get_free_space(Destination media, u64 *size);
+	Result list_tickets(std::vector<u64>& ret);
 
+	Result get_free_space(Destination media, u64 *size);
 	Result get_title_entry(u64 tid, AM_TitleEntry& entry);
 
-	Result delete_if_exist(u64 tid, FS_MediaType media = MEDIATYPE_SD);
-	Result delete_title(u64 tid, FS_MediaType media = MEDIATYPE_SD);
 	bool title_exists(u64 tid, FS_MediaType media = MEDIATYPE_SD);
+	bool ticket_exists(u64 tid);
 
-	u32 get_tid_unique(u64 tid);
-	bool is_base_tid(u64 tid);
-	u64 get_base_tid(u64 tid);
-	u16 get_tid_cat(u64 tid);
+	Result delete_title(u64 tid, FS_MediaType media = MEDIATYPE_SD, bool and_ticket = false, bool check_exist = true);
+
+	#define MIIPLAZA_UNIQ_JPN 0x00208
+	#define MIIPLAZA_UNIQ_USA 0x00218
+	#define MIIPLAZA_UNIQ_EUR 0x00228
+	#define MIIPLAZA_UNIQ_CHN 0x00268
+	#define MIIPLAZA_UNIQ_KOR 0x00278
+	#define MIIPLAZA_UNIQ_TWN 0x00288
+
+	// tid stuff, can be inlined
+
+	inline u32 get_tid_unique(u64 tid)
+	{
+		return (tid >> 8) & 0xFFFFFF;
+	}
+
+	inline u16 get_tid_cat(u64 tid)
+	{
+		return (tid >> 32) & 0xFFFF;
+	}
+
+	inline bool is_base_tid(u64 tid)
+	{
+		u16 cat = get_tid_cat(tid);
+		/* 0x4 = AddOnContents,
+		* which updates (0xE) and DLC (0x8C) also include
+		* 0x8000 = DSiWare,
+		* consider all DSiWare base. For some reason sets 0x4 for all DSiWare */
+		return (cat & 0x8000) || (cat & 0x4) == 0;
+	}
+
+	inline u64 get_base_tid(u64 tid)
+	{
+		/* clear the bits of cat (2nd u16) */
+		u64 ret = tid & 0xFFFF0000FFFFFFFF;
+		u32 uniq = get_tid_unique(tid);
+
+		if (uniq == MIIPLAZA_UNIQ_JPN || uniq == MIIPLAZA_UNIQ_USA || uniq == MIIPLAZA_UNIQ_EUR || uniq == MIIPLAZA_UNIQ_CHN || uniq == MIIPLAZA_UNIQ_KOR || uniq == MIIPLAZA_UNIQ_TWN)
+			ret |= 0x1000000000; // add systitle bit
+
+		return ret;
+	}
 
 	// https://www.3dbrew.org/wiki/Titles#Title_IDs
 	static inline Destination detect_dest(u64 tid)
@@ -135,6 +184,8 @@ namespace ctr {
 		std::string u16conv(u16 *str, size_t size);
 		TitleSMDH *get(u64 tid);
 	}
+
+	u8 get_system_region();
 
 	Result lockNDM();
 	void unlockNDM();

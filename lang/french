@@ -117,7 +117,7 @@ Ce titre n'existe pas: %1
 
 - netcon_lost
 La connexion internet a été perdue (%1).
-Nouvelle tentative dans $t seconds...
+Nouvelle tentative dans %2 seconds...
 
 - about_app
 A propos
@@ -194,7 +194,7 @@ manuel
 désactivé
 
 - patching_reboot
-Luma3DS Game Patching est maintenant activé.
+Luma3DS game patching est maintenant activé.
 La console doit redémarrer pour que ce changement fasse effet.
 
 - reboot_now
@@ -325,11 +325,9 @@ Valeur entre 0 et 255
 Utilisez cet ID pour obtenir de l'aide:
 %1
 
-- block
-bloc
-
-- blocks
-blocs
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 bloc)";
+else       return "%1 (%2 blocs)";
 
 - search_text
 Recherche par texte
@@ -428,4 +426,60 @@ par %1
 
 - themes
 Thèmes
+
+- delete_unused_tickets
+Effacer les tickets inutilisés
+
+- found_unused_tickets
+%1 tickets inutilisé ont été trouvés. Voulez-vous les supprimer?
+
+- found_no_unused_tickets
+Aucun ticket inutilisé trouvé.
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+L'aperçu du thème récupéré du serveur est invalide!
+
+- hint_add_queue
+UI_GLYPH_Y: ajouter à la file
+
+- hint_preview_theme
+UI_GLYPH_X: aperçu du thème
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+Autre nom
+
+# setting title
+- show_alt
+Montrer les noms alternatifs
+
+# setting description
+- show_alt_desc
+Montre les noms alternatif si disponible.
+
+# setting title
+- default_reinst
+Réinstaller par défaut
+
+# setting description
+- default_reinst_desc
+Réinstalle par défaut, ne demande pas pour remplacer un titre déjà existant.
+
+# shown while installing a queue on the other screen
+#  %1 = current game title
+#  %2 = total titles
+#  %3 = current position in the queue
+- installing_game_x_of_y
+Progression: %2/%3
+%1
+
+- no_other_params_prod
+Impossible de spécifier d'autres paramètres en spécifiant un code de produit
+
+- invalid_prod
+Code de produit invalide
+
+- search_prod
+Recherche par code de produit
 

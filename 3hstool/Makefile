@@ -1,13 +1,13 @@
 
-OBJS = hlink.o main.o hstx.o
-CFLAGS = -pedantic -Wall -g -lm
+OBJS = hlink.o main.o hstx.o hwav.o
+CFLAGS = -pedantic -Wall -g -lavformat -lavcodec -lavutil -lswresample -lm
 DESTDIR ?= /usr/local
 TARGET ?= 3hstool
 
 .PHONY: clean all install
 all: $(TARGET)
 clean:
-	@rm -f $(OBJS) hlink
+	@rm -f $(OBJS) $(TARGET)
 
 install: $(TARGET)
 	install -m 557 $(TARGET) $(DESTDIR)/bin

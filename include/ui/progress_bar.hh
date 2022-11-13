@@ -20,6 +20,7 @@
 #include <ui/base.hh>
 
 #include <functional>
+#include <limits>
 #include <string>
 
 #include "settings.hh"
@@ -35,6 +36,62 @@ namespace ui
 	std::string up_to_mib_serialize(u64, u64);
 	std::string up_to_mib_postfix(u64);
 
+	template <typename T, size_t S>
+	class circular_buffer
+	{
+	public:
+		circular_buffer()
+			: ptr(0), len(0) { }
+
+		void push(const T& el)
+		{
+			this->array[this->ptr++] = el;
+			if(this->ptr == S)
+				this->ptr = 0;
+			if(this->len < S)
+				++this->len;
+		}
+
+		T avg() const
+		{
+			/* XXX: Should this be += diffs[i] / diffs.size() to prevent overflow
+			 *      or is that not accurate enough? */
+			T ret = 0;
+			for(size_t i = 0; i < this->len; ++i)
+				ret += this->array[i];
+			return ret / this->len;
+		}
+
+		/* UB for this->size() = 0 */
+		void maxmin(T& max, T& min) const
+		{
+			max = this->array[0];
+			min = this->array[0];
+			for(size_t i = 1; i < this->len; ++i)
+			{
+				if(this->array[i] > max) max = this->array[i];
+				if(this->array[i] < min) min = this->array[i];
+			}
+		}
+
+		T& operator [] (size_t i)
+		{ return this->array[i]; }
+		T at(size_t i) const { return this->array[i]; }
+
+		static constexpr size_t max_size() { return S; }
+		size_t size() const { return this->len; }
+
+		size_t start() const { return this->len == S ? (this->ptr == (S - 1) ? 0 : this->ptr + 1) : 0; }
+		size_t next(size_t prev) const { return prev == (S - 1) ? 0 : prev + 1; }
+		size_t end() const { return this->ptr; }
+
+	private:
+		T array[S];
+		size_t ptr, len;
+
+	};
+	using SpeedBuffer = circular_buffer<float, 30>;
+
 	UI_SLOTS_PROTO_EXTERN(ProgressBar_color)
 	class ProgressBar : public ui::BaseWidget
 	{ UI_WIDGET("ProgressBar")
@@ -45,7 +102,7 @@ namespace ui
 
 		void destroy();
 
-		bool render(const ui::Keys& keys) override;
+		bool render(ui::Keys& keys) override;
 		float height() override;
 		float width() override;
 
@@ -56,6 +113,8 @@ namespace ui
 		void set_postfix(std::function<std::string(u64)> cb);
 
 		void activate();
+
+		const SpeedBuffer& speed_buffer() { return this->speedDiffs; }
 
 
 	private:
@@ -81,6 +140,28 @@ namespace ui
 		/* data for ETA/speed */
 		u64 prevpoll = osGetTime() - 1; /* -1 to ensure update_state() never divs by 0 */
 		u64 prevpart = 0;
+
+		SpeedBuffer speedDiffs;
+
+	};
+
+	UI_SLOTS_PROTO_EXTERN(LatencyGraph_color)
+	class LatencyGraph : public ui::BaseWidget
+	{ UI_WIDGET("LatencyGraph")
+	public:
+		void setup(const SpeedBuffer& buffer);
+
+		bool render(ui::Keys& keys) override;
+		void set_x(float x) override;
+		float height() override;
+		float width() override;
+
+
+	private:
+		UI_SLOTS_PROTO(LatencyGraph_color, 1)
+
+		const SpeedBuffer *buffer;
+		float step, w;
 
 
 	};

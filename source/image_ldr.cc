@@ -99,7 +99,7 @@ void rgba_to_abgr(u32 *data, u16 w, u16 h)
 		data[i] = __builtin_bswap32(data[i]);
 }
 
-void load_rgba8(C2D_Image *image, u32 *data, u16 w, u16 h, bool allocStructs)
+void load_abgr8(C2D_Image *image, u32 *data, u16 w, u16 h, bool allocStructs)
 {
 	Tex3DS_SubTexture *subtex;
 	C3D_Tex *tex;
@@ -128,10 +128,12 @@ void load_rgba8(C2D_Image *image, u32 *data, u16 w, u16 h, bool allocStructs)
 	panic_assert(C3D_TexInit(tex, w_pow2, h_pow2, GPU_RGBA8), "failed to load C3D texture");
 	u32 *dst = (u32 *) tex->data;
 
+	memset(dst, 0x00, w_pow2 * h_pow2 * 4);
+	u32 dst_pos;
 	for(u16 x = 0; x < w; x++)
 		for(u16 y = 0; y < h; y++)
 		{
-			u32 dst_pos = ((((y >> 3) * (w_pow2 >> 3) + (x >> 3)) << 6) + ((x & 1) | ((y & 1) << 1) | ((x & 2) << 1) | ((y & 2) << 2) | ((x & 4) << 2) | ((y & 4) << 3)));
+			dst_pos = ((((y >> 3) * (w_pow2 >> 3) + (x >> 3)) << 6) + ((x & 1) | ((y & 1) << 1) | ((x & 2) << 1) | ((y & 2) << 2) | ((x & 4) << 2) | ((y & 4) << 3)));
 			memcpy(&dst[dst_pos], &data[y * w + x], 4);
 		}
 

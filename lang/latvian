@@ -117,7 +117,7 @@ Aplikācija neeksistē %1
 
 - netcon_lost
 Zaudēts tīkla savienojums (%1).
-Mēģinās vēlreiz pēc $t sekundēm...
+Mēģinās vēlreiz pēc %2 sekundēm...
 
 - about_app
 Par
@@ -324,11 +324,9 @@ Vērtība no 0 līdz 255
 Izmantojiet šo ID, lai saņemtu palīdzību:
 %1
 
-- block
-bloks
-
-- blocks
-bloki
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 bloks)";
+else       return "%1 (%2 bloki)";
 
 - search_text
 Meklēt pēc teksta
@@ -427,4 +425,63 @@ autors %1
 
 - themes
 motīvi
+
+# nowrap, burger menu item
+- delete_unused_tickets
+Dzēst neizmantotās biļetes
+
+# asking user if they want to delete unused tickets, %1 = amount of unused tickets that were found
+- found_unused_tickets
+Atrastas %1 neizmantotas biļetes. Vai vēlaties tos noņemt?
+
+# informing user that no missing tickets were found
+- found_no_unused_tickets
+Netika atrastas neizmantotas biļetes.
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+Nederīgs dizaina priekšskatījums, kas iegūts no servera!
+
+- hint_add_queue
+UI_GLYPH_Y: pievienot rindai
+
+- hint_preview_theme
+UI_GLYPH_X: priekšskatīt dizainu
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+Alternatīvs nosaukums
+
+# setting title
+- show_alt
+Rādīt alternatīvo nosaukumu
+
+# setting description
+- show_alt_desc
+Rādīt alternatīvus nosaukumus, ja tādi ir pieejami.
+
+# setting title
+- default_reinst
+Pēc noklusējuma atkārtoti instalēt
+
+# setting description
+- default_reinst_desc
+Pārinstalēt pēc noklusējuma; skaidri nelūdziet izdzēst jau instalētu aplikāciju
+
+# shown while installing a queue on the other screen
+#  %1 = pašreizējās aplikācijas nosaukums
+#  %2 = kopējās aplikācijas
+#  %3 = pašreizējā pozīcija rindā
+- installing_game_x_of_y
+Apstrādes rinda: %2/%3
+%1
+
+- no_other_params_prod
+Norādot preces kodu, nevar norādīt citus parametrus
+
+- invalid_prod
+Nederīgs produkta kods
+
+- search_prod
+Meklēt pēc preces koda
 

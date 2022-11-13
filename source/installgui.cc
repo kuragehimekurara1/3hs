@@ -39,11 +39,28 @@ static ui::slot_color_getter slotmgr_getters[] = {
 static ui::SlotManager slotmgr;
 
 
-static void make_queue(ui::RenderQueue& queue, ui::ProgressBar **bar)
+static void make_queue(ui::RenderQueue& queue, ui::ProgressBar **bar, const std::string& label)
 {
 	ui::builder<ui::ProgressBar>(ui::progloc())
 		.y(ui::layout::center_y)
 		.add_to(bar, queue);
+	if(label.size())
+	{
+		ui::builder<ui::Text>(ui::progloc() == ui::Screen::top ? ui::Screen::bottom : ui::Screen::top, label)
+			.x(ui::layout::center_x)
+			.y(ui::layout::center_y)
+			.z(ui::layer::top)
+			.wrap()
+			.add_to(queue);
+	}
+
+	if(!ISET_DISABLE_GRAPH)
+	{
+		ui::builder<ui::LatencyGraph>(ui::progloc() == ui::Screen::top ? ui::Screen::bottom : ui::Screen::top, (*bar)->speed_buffer())
+			.y(ui::layout::center_y)
+			.z(ui::layer::middle)
+			.add_to(queue);
+	}
 	queue.render_frame();
 }
 
@@ -65,14 +82,15 @@ static void finalize_install(u64 tid, bool interactive)
 	}
 
 	/* only set locale if we're interactive, otherwise the caller has to handle it himself */
-	if(interactive && luma::set_locale(tid))
+	if(interactive && luma::set_locale(tid, interactive))
 		luma::maybe_set_gamepatching();
 }
 
 /* returns if the user wants to continue */
 static bool maybe_warn_already_installed(u64 tid, bool interactive)
 {
-	if(!interactive || !ISET_WARN_NO_BASE || ctr::is_base_tid(tid) || ctr::title_exists(ctr::get_base_tid(tid), ctr::to_mediatype(ctr::detect_dest(tid))))
+	u64 base_tid = ctr::get_base_tid(tid);
+	if(!interactive || !ISET_WARN_NO_BASE || ctr::is_base_tid(tid) || ctr::title_exists(base_tid, ctr::to_mediatype(ctr::detect_dest(base_tid))))
 		return true;
 
 	/* we need to warn the user and ask if he wants to continue now */
@@ -89,7 +107,7 @@ Result install::gui::net_cia(const std::string& url, u64 tid, bool interactive, 
 	ui::ProgressBar *bar;
 	ui::RenderQueue queue;
 
-	make_queue(queue, &bar);
+	make_queue(queue, &bar, "");
 
 	bool shouldReinstall = defaultReinstallable;
 	Result res = 0;
@@ -107,7 +125,9 @@ start_install:
 			goto start_install;
 	}
 
-	if(R_SUCCEEDED(res)) res = add_seed(tid);
+	// if(R_SUCCEEDED(res)) res = add_seed(tid);
+	// have to remove this for now
+
 	if(R_FAILED(res))
 	{
 		error_container err = get_error(res);
@@ -120,7 +140,7 @@ start_install:
 	return res;
 }
 
-Result install::gui::hs_cia(const hsapi::FullTitle& meta, bool interactive, bool defaultReinstallable)
+Result install::gui::hs_cia(const hsapi::FullTitle& meta, bool interactive, bool defaultReinstallable, const std::string& label)
 {
 	if(!maybe_warn_already_installed(meta.tid, interactive))
 		return 0;
@@ -129,7 +149,7 @@ Result install::gui::hs_cia(const hsapi::FullTitle& meta, bool interactive, bool
 	ui::ProgressBar *bar;
 	ui::RenderQueue queue;
 
-	make_queue(queue, &bar);
+	make_queue(queue, &bar, label.size() ? label : PSTRING(installing_game, meta.name));
 
 	bool shouldReinstall = defaultReinstallable;
 	Result res = 0;
@@ -152,7 +172,7 @@ start_install:
 
 	if(R_SUCCEEDED(res))
 	{
-		res = add_seed(meta.tid);
+		res = add_seed(meta);
 		finalize_install(meta.tid, interactive);
 		if(interactive)
 		{
@@ -172,6 +192,7 @@ start_install:
 	}
 
 	if(interactive) ctr::unlockNDM();
+	/* do not reset flags: we want to trigger a LED Reset after either sleep mode lift or the timeout, not after just the timeout */
 	else            ui::LED::SetTimeout(time(NULL) + 2);
 
 	set_focus(focus);
@@ -188,7 +209,6 @@ static void setled(size_t i)
 	ui::LED::Pattern pattern;
 	ui::LED::Solid(&pattern, UI_LED_MAKE_ANIMATION(0, 0xFF, 0), slotmgr.get(i));
 	ui::LED::SetSleepPattern(&pattern);
-
 }
 
 void install::gui::SuccessLED() { setled(0); }

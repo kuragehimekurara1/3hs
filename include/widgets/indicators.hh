@@ -26,7 +26,7 @@ namespace ui
 	{ UI_WIDGET("FreeSpaceIndicator")
 	public:
 		void setup();
-		bool render(const ui::Keys& keys) override;
+		bool render(ui::Keys& keys) override;
 		float height() override { return 0.0f; }
 		float width() override { return 0.0f; }
 		void update();
@@ -42,7 +42,7 @@ namespace ui
 	{ UI_WIDGET("TimeIndicator")
 	public:
 		void setup();
-		bool render(const ui::Keys& keys) override;
+		bool render(ui::Keys& keys) override;
 		float height() override { return 0.0f; }
 		float width() override { return 0.0f; }
 		void update();
@@ -62,7 +62,7 @@ namespace ui
 	{ UI_WIDGET("BatteryIndicator")
 	public:
 		void setup();
-		bool render(const ui::Keys& keys) override;
+		bool render(ui::Keys& keys) override;
 		float height() override { return 0.0f; }
 		float width() override { return 0.0f; }
 		void update();
@@ -80,7 +80,7 @@ namespace ui
 	{ UI_WIDGET("NetIndicator")
 	public:
 		void setup();
-		bool render(const ui::Keys& keys) override;
+		bool render(ui::Keys& keys) override;
 		float height() override { return 0.0f; }
 		float width() override { return 0.0f; }
 		void update();

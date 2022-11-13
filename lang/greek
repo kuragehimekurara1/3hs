@@ -117,7 +117,7 @@ hShop ID
 
 - netcon_lost
 Η σύνδεση με το δίκτυο χάθηκε (%1).
-Προσπάθεια επανασύνδεσης σε $t δευτερόλεπτα...
+Προσπάθεια επανασύνδεσης σε %2 δευτερόλεπτα...
 
 - about_app
 Σχετικά
@@ -194,7 +194,7 @@ Tip: Πατήστε το UI_GLYPH_Y για να προσθέσετε ένα τί
 απενεργοποιημένη
 
 - patching_reboot
-Το Luma3DS Game Patching είναι τώρα ενεργοποιημένο.
+Το Luma3DS game patching είναι τώρα ενεργοποιημένο.
 Το σύστημα πρέπει να επανεκκινηθεί για να τεθεί σε ισχύ αυτή η αλλαγή.
 
 - reboot_now
@@ -324,11 +324,9 @@ Password
 Χρησιμοποιήστε αυτό το αναγνωριστικό (ID) για να λάβετε υποστήριξη:
 %1
 
-- block
-block
-
-- blocks
-blocks
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 block)";
+else       return "%1 (%2 blocks)";
 
 - search_text
 Αναζήτηση με βάση κείμενο
@@ -413,4 +411,81 @@ blocks
 
 - allow_led_desc
 Αυτή η ρύθμιση θα κάνει τη λυχνία LED να αναβοσβήσει για να σας ενημερώσει για διάφορες αλλαγές κατάστασης, όπως όταν ολοκληρώνεται η εγκατάσταση ενός τίτλου.
+
+# don't translate "Enable developer UNITINFO", ENVINFO may be translated as configuration, retail may be translated as normal, unit may be translated as variant
+# If you've already translated this string you don't have to again
+- dev_unitinfo
+Σύμφωνα με το ENVINFO αυτής της κονσόλας, πρόκειται για κονσόλα development.
+Το 3hs δεν θα λειτουργήσει σωστά σε αυτό το σύστημα.
+Σε περίπτωση που έχετε ένα 3DS λιανικής, βεβαιωθείτε ότι η επιλογή "Enable developer UNITINFO" στη ρύθμιση παραμέτρων του Luma3DS είναι απενεργοποιημένη.
+
+# nowrap, used in for examples language select
+- hint_navigate
+UI_GLYPH_DPAD_CLEAR/UI_GLYPH_CPAD: πλοήγηση
+
+# %1 = theme author
+- made_by
+από %1
+
+# nowrap, burger menu item
+- themes
+Θέματα
+
+# nowrap, burger menu item
+- delete_unused_tickets
+Διαγραφή αχρησιμοποίητων εισιτηρίων
+
+# asking user if they want to delete unused tickets, %1 = amount of unused tickets that were found
+- found_unused_tickets
+Βρέθηκαν %1 αχρησιμοποίητα εισιτήρια. Θέλετε να τα αφαιρέσετε;
+
+# informing user that no missing tickets were found
+- found_no_unused_tickets
+Δεν βρέθηκαν αχρησιμοποίητα εισιτήρια.
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+Άκυρη προεπισκόπηση θέματος που ανακτήθηκε από τον διακομιστή!
+
+- hint_add_queue
+UI_GLYPH_Y: Προσθήκη στην ουρά αναμονής
+
+- hint_preview_theme
+UI_GLYPH_X: Προεπισκόπηση θέματος
+
+- alt_name
+Εναλλακτικό όνομα
+
+# setting title
+- show_alt
+Εμφάνιση εναλλακτικού ονόματος
+
+# setting description
+- show_alt_desc
+Εμφάνιση εναλλακτικών ονομάτων, αν υπάρχουν.
+
+# setting title
+- default_reinst
+Επανεγκατάσταση από προεπιλογή
+
+# setting description
+- default_reinst_desc
+Επανεγκατάσταση από προεπιλογή- μην ζητάτε ρητά να διαγραφεί ένας ήδη εγκατεστημένος τίτλος.
+
+# shown while installing a queue on the other screen
+# %1 = current game title
+# %2 = total titles
+# %3 = current position in the queue
+- installing_game_x_of_y
+Επεξεργασία ουράς: %2/%3
+%1
+
+- no_other_params_prod
+Δεν μπορούν να καθοριστούν άλλες παράμετροι κατά τον προσδιορισμό ενός κωδικού προϊόντος
+
+- invalid_prod
+Μη έγκυρος κωδικός προϊόντος
+
+- search_prod
+Αναζήτηση με κωδικό προϊόντος
 

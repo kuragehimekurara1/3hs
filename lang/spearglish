@@ -117,7 +117,7 @@ Title doesn't existeth: %1
 
 - netcon_lost
 Netw'rk connection hath lost (%1).
-Retrying in $t seconds
+Retrying in %2 seconds
 
 - about_app
 About
@@ -194,7 +194,7 @@ manual
 disabl'd
 
 - patching_reboot
-Luma3DS Game Patching is anon enabl'd.
+Luma3DS game patching is anon enabl'd.
 The system might not but beest restarted
 f'r this changeth to taketh effect
 
@@ -325,11 +325,9 @@ Value between 0 and 255
 Useth this id to receiveth supp'rt:
 %1
 
-- block
-block
-
-- blocks
-blocks
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 block)";
+else       return "%1 (%2 blocks)";
 
 - search_text
 Searcheth by text
@@ -433,3 +431,63 @@ by %1
 # nowrap, burger menu item
 - themes
 Themes
+
+# nowrap, burger menu item
+- delete_unused_tickets
+Fordid unus'd tickets
+
+# asking user if they want to delete unused tickets, %1 = amount of unused tickets that were found
+- found_unused_tickets
+Hath found %1 unus'd tickets. Doth thee wanteth to removeth those folk?
+
+# informing user that no missing tickets were found
+- found_no_unused_tickets
+Nay unus'd tickets w're hath found.
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+Invalid theme preview did fetch from s'rv'r!
+
+- hint_add_queue
+UI_GLYPH_Y: addeth to queueth
+
+- hint_preview_theme
+UI_GLYPH_X: previeweth theme
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+Alt'rnative nameth
+
+# setting title
+- show_alt
+Showeth alt'rnative nameth
+
+# setting description
+- show_alt_desc
+Showeth alt'rnative names, if 't be true available
+
+# setting title
+- default_reinst
+Reinstalleth by default
+
+# setting description
+- default_reinst_desc
+Reinstalleth by default; explicitily not asketh to fordid an already did installeth title
+
+# shown while installing a queue on the other screen
+#  %1 = current game title
+#  %2 = total titles
+#  %3 = current position in the queue
+- installing_game_x_of_y
+Processing queueth: %2/%3
+%1
+
+- no_other_params_prod
+Cannot specifyeth any oth'r paramet'rs at which hour specifying a product code
+
+- invalid_prod
+Inv'lid product codet
+
+- search_prod
+Searcheth by product code
+

@@ -117,7 +117,7 @@ Il titolo non esiste: %1
 
 - netcon_lost
 Connessione alla rete persa (%1).
-Riprovo fra $t secondi...
+Riprovo fra %2 secondi...
 
 - about_app
 Riguardo l'app
@@ -194,7 +194,7 @@ manuale
 disabilitato
 
 - patching_reboot
-Luma3DS Game Patching è ora attivo.
+Luma3DS game patching è ora attivo.
 Il sistema dev'essere riavviato perché i cambiamenti abbiano effetto.
 
 - reboot_now
@@ -208,7 +208,7 @@ Richiesta fallita. Riprovare?
 
 - search_zero_results
 La tua ricerca non ha prodotto risultati.
-PremiUI_GLYPH_Aper tornare indietro.
+Premi UI_GLYPH_A per tornare indietro.
 
 - credits
 Crediti
@@ -221,7 +221,7 @@ Nessuna richiesta
 
 - invalid_query
 Richiesta non valida
-PressUI_GLYPH_Aper tornare indietro
+Premi UI_GLYPH_A per tornare indietro
 
 - min_constraint
 Questa versione di 3hs %1 è più vecchia di quella richiesta %2
@@ -324,11 +324,9 @@ Valore tra 0 e 255
 Usa questo ID per ottenere supporto:
 %1
 
-- block
-blocco
-
-- blocks
-blocchi
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 blocco)";
+else       return "%1 (%2 blocchi)";
 
 - search_text
 Cerca tramite testo
@@ -413,4 +411,107 @@ Attiva indicatori di stato con i LED
 
 - allow_led_desc
 Questo farà illuminare le luci LED per informarti di vari cambiamenti di stato, come un titolo che finisce di installarsi
+
+- dev_unitinfo
+Secondo la configurazione di questa console, questa è una variante di sviluppo.
+3hs non funzionerà correttamente su questo sistema.
+In caso tu abbia un 3DS normale, assicurati che "Enable developer UNITINFO" nella configurazione di Luma3DS sia disattivato.
+
+- hint_navigate
+UI_GLYPH_DPAD_CLEAR/UI_GLYPH_CPAD: naviga
+
+- made_by
+da %1
+
+- themes
+Temi
+
+# nowrap, burger menu item
+- delete_unused_tickets
+Rimuovi biglietti non utilizzati
+
+# asking user if they want to delete unused tickets, %1 = amount of unused tickets that were found
+- found_unused_tickets
+Trovato %1 biglietto/i non utilizzato/i. Vuoi rimuoverli?
+
+# informing user that no missing tickets were found
+- found_no_unused_tickets
+Non sono stati trovati biglietti inutilizzati.
+
+# don't translate "Enable developer UNITINFO", ENVINFO may be translated as configuration, retail may be translated as normal, unit may be translated as variant
+- dev_unitinfo
+Secondo questa console ENVINFO, questa è un'unità di sviluppo.
+3hs non funzionerà correttamente su questo sistema.
+Nel caso in cui hai un 3DS retail, assicurati che "Abilita lo sviluppatore UNITINFO" nella configurazione di Luma3DS sia disabilitato.
+
+# nowrap, used in for examples language select
+- hint_navigate
+UI_GLYPH_DPAD_CLEAR/UI_GLYPH_CPAD: naviga
+
+# %1 = theme author
+- made_by
+creato da %1
+
+# nowrap, burger menu item
+- themes
+Temi
+
+# nowrap, burger menu item
+- delete_unused_tickets
+Elimina i ticket inutilizzati
+
+# asking user if they want to delete unused tickets, %1 = amount of unused tickets that were found
+- found_unused_tickets
+Sono stati trovati %1 ticket non utilizzati. Li vuoi rimuovere?
+
+# informing user that no missing tickets were found
+- found_no_unused_tickets
+Non sono stati trovati ticket inutilizzati.
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+Anteprima del tema non valida!
+
+- hint_add_queue
+UI_GLYPH_Y: Aggiungi alla coda
+
+- hint_preview_theme
+UI_GLYPH_X: Anteprima tema
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+Nome alternativo
+
+# setting title
+- show_alt
+Mostra nome alternativo
+
+# setting description
+- show_alt_desc
+Mostra nomi alternativi se disponibili
+
+# setting title
+- default_reinst
+Reinstalla automaticamente
+
+# setting description
+- default_reinst_desc
+Reinstalla automaticamente; non chiedere esplicitamente di eliminare un titolo già installato.
+
+# shown while installing a queue on the other screen
+#  %1 = current game title
+#  %2 = total titles
+#  %3 = current position in the queue
+- installing_game_x_of_y
+Processando fila: %2/%3
+%1
+
+- no_other_params_prod
+Impossibile specificare altri parametri quando viene specificato un codice prodotto
+
+- invalid_prod
+Codice prodotto non valido
+
+- search_prod
+Cerca per codice prodotto
 

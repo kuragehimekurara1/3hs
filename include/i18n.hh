@@ -23,12 +23,13 @@
 #include <vector>
 #include <string>
 
-#include "i18n_tab.hh"
+#include "build/i18n_tab.hh"
 
 // ParamSTRING
 #define PSTRING(x, ...) i18n::interpolate(str::x, __VA_ARGS__)
 #define SURESTRING(x) i18n::getsurestr(str::x)
 #define STRING(x) i18n::getstr(str::x)
+#define TL(x) x
 
 
 namespace i18n
@@ -36,6 +37,8 @@ namespace i18n
 	/* you don't have to cache the return of this function */
 	const char *getstr(str::type sid, str::type lid);
 	const char *getstr(str::type id);
+
+	const char *getstr_param(str::type id, const std::vector<std::string>& params);
 
 	/* ensure the config exists; more expensive than getstr() */
 	const char *getsurestr(str::type id);
@@ -65,7 +68,7 @@ namespace i18n
 		std::string adv_getstr(str::type id, std::vector<std::string>& substs, const T& head)
 		{
 			substs.push_back(stringify(head));
-			const char *rawstr = getstr(id);
+			const char *rawstr = getstr_param(id, substs);
 			std::string ret;
 
 			do

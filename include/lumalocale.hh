@@ -23,7 +23,7 @@
 namespace luma
 {
 	/* returns true if a file was written */
-	bool set_locale(u64 tid);
+	bool set_locale(u64 tid, bool interactive);
 	/* sets gamepatching and prompts for reboot if required */
 	void maybe_set_gamepatching();
 }

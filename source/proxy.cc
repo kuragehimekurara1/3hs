@@ -30,7 +30,8 @@
 Result proxy::apply(httpcContext *context)
 {
 	NewSettings *ns = get_nsettings();
-	if(ns->proxy_port != 0)
+	ilog("proxy is%s set", ns->proxy_port ? "" : " not");
+	if(ns->proxy_port)
 	{
 		return httpcSetProxy(context, ns->proxy_port, ns->proxy_host,
 			ns->proxy_username, ns->proxy_password);
@@ -45,14 +46,15 @@ static bool is_CRLF(const std::string& buf, std::string::size_type i)
 	return buf[i == 0 ? 0 : i - 1] == '\r';
 }
 
-static void put_semisep(const std::string& buf, std::string& p1, std::string& p2)
+static void put_colonsep(const std::string& buf, std::string& p1, std::string& p2)
 {
-	std::string::size_type semi = buf.find(":");
-	if(semi == std::string::npos) panic(STRING(invalid_proxy));
+	std::string::size_type colon = buf.find(":");
+	if(colon == std::string::npos)
+		panic(STRING(invalid_proxy));
 
-	p1 = buf.substr(0, semi);
-	// +1 to remove semi
-	p2 = buf.substr(semi + 1);
+	p1 = buf.substr(0, colon);
+	// +1 to remove colon 
+	p2 = buf.substr(colon + 1);
 }
 
 static bool validate(const proxy::legacy::Params& p)
@@ -109,11 +111,11 @@ void proxy::legacy::parse(proxy::legacy::Params& p)
 		// Skip \n
 		std::string userpasswd = strbuf.substr(line + 1, crlf ? line - 1 : line);
 		if(userpasswd != "")
-			put_semisep(userpasswd, p.username, p.password);
+			put_colonsep(userpasswd, p.username, p.password);
 	}
 
 	std::string port;
-	put_semisep(proxyport, p.host, port);
+	put_colonsep(proxyport, p.host, port);
 
 	p.port = strtoul(port.c_str(), nullptr, 10);
 	if(!validate(p)) panic(STRING(invalid_proxy));

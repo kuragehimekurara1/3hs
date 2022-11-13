@@ -14,7 +14,9 @@
  * this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ui/loading.hh"
+#include <ui/progress_bar.hh>
+#include <ui/loading.hh>
+
 #include "thread.hh"
 #include "util.hh"
 #include "i18n.hh"
@@ -27,21 +29,20 @@ void ui::loading(std::function<void()> callback)
 	std::string desc = ::set_desc(STRING(loading));
 	bool focus = ::set_focus(true);
 
-	/* static because ??? */
-	static bool spin_flag;
-	spin_flag = true;
+	bool spin_flag = true;
 
 	aptSetHomeAllowed(false);
-	ctr::thread<> th([]() -> void {
+	ctr::thread<> th([&spin_flag]() -> void {
 		ui::RenderQueue queue;
 		ui::builder<ui::Spinner>(ui::Screen::top)
 			.x(ui::layout::center_x)
 			.y(ui::layout::center_y)
 			.add_to(queue);
 
-		while(spin_flag && queue.render_frame(ui::RenderQueue::get_keys()))
+		ui::Keys keys;
+		while(spin_flag && queue.render_frame((keys = ui::RenderQueue::get_keys())))
 			/* no-op */ ;
-	});
+	}, -1);
 
 	/* */ callback();
 	spin_flag = false;
@@ -52,6 +53,47 @@ void ui::loading(std::function<void()> callback)
 	::set_desc(desc);
 }
 
+static std::string loadingbar_serialize(u64 cur, u64 total)
+{
+	(void) total;
+	return std::to_string(cur);
+}
+
+static std::string loadingbar_postfix(u64 cur)
+{
+	(void) cur;
+	return "";
+}
+
+ui::LoadingBar::LoadingBar(size_t max)
+	: cur(0), max(max)
+{
+	ui::builder<ui::ProgressBar>(ui::Screen::top, max)
+		.y(ui::layout::center_y)
+		.add_to(&this->bar, this->rq);
+
+	this->bar->set_serialize(loadingbar_serialize);
+	this->bar->set_postfix(loadingbar_postfix);
+	this->bar->activate();
+	this->rq.render_frame();
+}
+
+void ui::LoadingBar::reset_to(size_t nmax)
+{
+	this->max = nmax;
+	this->cur = 0;
+	this->rq.render_frame();
+}
+
+void ui::LoadingBar::update(size_t n)
+{
+	this->cur += n;
+	if(this->cur > this->max)
+		this->cur = this->max;
+	this->bar->update(this->cur, this->max);
+	this->rq.render_frame();
+}
+
 /* class Spinner */
 
 void ui::Spinner::setup()
@@ -60,7 +102,7 @@ void ui::Spinner::setup()
 	this->sprite.ptr()->set_center(0.5f, 0.5f);
 }
 
-bool ui::Spinner::render(const ui::Keys& keys)
+bool ui::Spinner::render(ui::Keys& keys)
 {
 	this->sprite.ptr()->rotate(1.0f);
 	return this->sprite->render(keys);
@@ -99,12 +141,12 @@ void ui::Spinner::set_y(float y)
 void ui::Spinner::set_z(float z)
 { this->sprite.ptr()->set_z(z); }
 
-void ui::detail::TimeoutScreenHelper::setup(const std::string& fmt, size_t nsecs, bool *shouldStop)
+void ui::detail::TimeoutScreenHelper::setup(Result res, size_t nsecs, bool *shouldStop)
 {
-	this->fmt = fmt;
 	this->startTime = this->lastCheck = time(NULL);
 	this->shouldStop = shouldStop;
 	this->nsecs = nsecs;
+	this->res = "0x" + pad8code(res);
 
 	this->text.setup(ui::Screen::top);
 	this->text->set_x(ui::layout::center_x);
@@ -116,31 +158,10 @@ void ui::detail::TimeoutScreenHelper::setup(const std::string& fmt, size_t nsecs
 
 void ui::detail::TimeoutScreenHelper::update_text(time_t now)
 {
-	std::string ntxt;
-	ntxt.reserve(this->fmt.size());
-
-	for(size_t i = 0; i < this->fmt.size(); ++i)
-	{
-		switch(this->fmt[i])
-		{
-		case '$':
-			++i;
-			if(this->fmt[i] == 't')
-				ntxt += std::to_string(this->nsecs - (now - this->startTime));
-			else ntxt.push_back(this->fmt[i]);
-			break;
-
-		default:
-			ntxt.push_back(this->fmt[i]);
-			break;
-
-		}
-	}
-
-	this->text->set_text(ntxt);
+	this->text->set_text(PSTRING(netcon_lost, this->res, this->nsecs - (now - this->startTime)));
 }
 
-bool ui::detail::TimeoutScreenHelper::render(const ui::Keys& keys)
+bool ui::detail::TimeoutScreenHelper::render(ui::Keys& keys)
 {
 	if((keys.kDown & (KEY_START | KEY_B)) && this->shouldStop)
 	{
@@ -163,7 +184,7 @@ bool ui::detail::TimeoutScreenHelper::render(const ui::Keys& keys)
 
 // timeoutscreen()
 
-bool ui::timeoutscreen(const std::string& fmt, size_t nsecs, bool allowCancel)
+bool ui::timeoutscreen(Result res, size_t nsecs, bool allowCancel)
 {
 	bool isOpen;
 	bool ret = false;
@@ -171,7 +192,7 @@ bool ui::timeoutscreen(const std::string& fmt, size_t nsecs, bool allowCancel)
 	{
 		ui::RenderQueue queue;
 
-		ui::builder<ui::detail::TimeoutScreenHelper>(ui::Screen::top, fmt, nsecs, allowCancel ? &ret : nullptr)
+		ui::builder<ui::detail::TimeoutScreenHelper>(ui::Screen::top, res, nsecs, allowCancel ? &ret : nullptr)
 			.add_to(queue);
 
 		queue.render_finite();

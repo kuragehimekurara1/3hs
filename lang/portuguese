@@ -117,7 +117,7 @@ Jogo não existe: %1
 
 - netcon_lost
 Conexão com rede perdida (%1).
-Tentando novamente em $t segundos...
+Tentando novamente em %2 segundos...
 
 - about_app
 Sobre
@@ -194,7 +194,7 @@ manual
 desligado
 
 - patching_reboot
-Luma3DS Game Patching está ligado.
+Luma3DS game patching está ligado.
 A consola tem de ser reinicia para as mudanças tomarem efeito.
 
 - reboot_now
@@ -324,11 +324,9 @@ Valor entre 0 e 255
 Usa este ID para obter supporte:
 %1
 
-- block
-bloco
-
-- blocks
-blocos
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 bloco)";
+else       return "%1 (%2 blocos)";
 
 - search_text
 Pesquisa por texto
@@ -427,4 +425,60 @@ por %1
 
 - themes
 Temas
+
+- delete_unused_tickets
+Remover tickets não utilizados
+
+- found_unused_tickets
+Encontrados %1 tickets não utilizados. Queres removê-los?
+
+- found_no_unused_tickets
+Nenhum ticket não utilizado foi encontrado.
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+Visualização de tema inválida buscada do server!
+
+- hint_add_queue
+UI_GLYPH_Y: addicionar à fila
+
+- hint_preview_theme
+UI_GLYPH_X: visualizar tema
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+Nome alternativo
+
+# setting title
+- show_alt
+Mostrar nome alternativo
+
+# setting description
+- show_alt_desc
+Mostrar nomes alternativos se estiverem disponíveis.
+
+# setting title
+- default_reinst
+Reinstalar como predefinição
+
+# setting description
+- default_reinst_desc
+Reinstalar como predefinição; não perguntar para remover um jogo já instalado.
+
+# shown while installing a queue on the other screen
+#  %1 = jogo atual
+#  %2 = jogos totais
+#  %3 = posição atual na fila
+- installing_game_x_of_y
+Processando fila: %2/%3
+%1
+
+- no_other_params_prod
+Não podes especificar outros parâmetros quando especificas um código de produto
+
+- invalid_prod
+Código de produto inválido
+
+- search_prod
+Pesquisar por código de produto
 

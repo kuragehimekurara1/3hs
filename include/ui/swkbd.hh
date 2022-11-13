@@ -32,7 +32,7 @@ namespace ui
 		void setup(std::string *ret, int maxLen = 200, SwkbdType type = SWKBD_TYPE_NORMAL,
 			int numBtns = 2);
 
-		bool render(const ui::Keys&) override;
+		bool render(ui::Keys&) override;
 		float height() override;
 		float width() override;
 
@@ -60,6 +60,41 @@ namespace ui
 		std::string *ret;
 		size_t len;
 
+
+	};
+
+	class KBDEnabledButton : public ui::BaseWidget
+	{ UI_WIDGET("KBDEnabledButton")
+	public:
+		using update_callback_type = std::function<void(KBDEnabledButton *)>;
+
+		void setup(const std::string& default_label, const std::string& empty_label, const std::string& hint, size_t min_len = 0);
+
+		bool render(ui::Keys&) override;
+
+		float height() override { return this->btn->height(); }
+		float width() override { return this->btn->width(); }
+
+		void set_x(float x) override { this->btn->set_x(x); }
+		void set_y(float y) override { this->btn->set_y(y); }
+
+		float get_x() override { return this->btn->get_x(); }
+		float get_y() override { return this->btn->get_y(); }
+
+		void set(const std::string& val);
+		const std::string& value();
+
+		enum connect_type { on_update };
+		void connect(connect_type, update_callback_type);
+
+		bool is_empty() { return !this->hasValue; }
+
+	private:
+		update_callback_type update_cb = nullptr;
+		ui::ScopedWidget<ui::Button> btn;
+		std::string empty, hint;
+		size_t min_len;
+		bool hasValue;
 
 	};
 

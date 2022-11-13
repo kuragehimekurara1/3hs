@@ -32,7 +32,7 @@ namespace ui
 		void setup(u64 tid, SMDHIconType type = SMDHIconType::large);
 		void destroy() override;
 
-		bool render(const ui::Keys& keys) override;
+		bool render(ui::Keys& keys) override;
 		float height() override;
 		float width() override;
 

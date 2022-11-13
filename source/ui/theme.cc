@@ -76,6 +76,8 @@ enum hstx_ident {
 	ID_SMDH_BORDER_CLR   = 0x1015,
 	ID_CHKBX_BORDER_CLR  = 0x1016,
 	ID_CHKBX_CHK_CLR     = 0x1017,
+	ID_GRAPH_LINE_CLR    = 0x1018,
+	ID_WARN_CLR          = 0x1019,
 
 	ID_MORE_IMG          = 0x2001,
 	ID_BATTERY_IMG       = 0x2002,
@@ -96,9 +98,9 @@ ui::Theme *ui::Theme::global()
 
 void ui::Theme::cleanup_images()
 {
-	for(u32 i = ui::theme::max_color + 1; i < ui::theme::max; ++i)
-		if(this->descriptors[i].image.actual_image.tex && this->descriptors[i].image.isOwn)
-			delete_image(this->descriptors[i].image.actual_image);
+	for(u32 i = 0; i < ui::theme::imax; ++i)
+		if(this->image_descriptors[i].actual_image.tex && this->image_descriptors[i].isOwn)
+			delete_image(this->image_descriptors[i].actual_image);
 	this->clear();
 }
 
@@ -145,7 +147,8 @@ bool ui::Theme::open(const u8 *data, u32 size, const std::string& id, ui::Theme 
 
 void ui::Theme::clear()
 {
-	memset(this->descriptors, 0, sizeof(this->descriptors));
+	memset(this->image_descriptors, 0, sizeof(this->image_descriptors));
+	memset(this->color_descriptors, 0, sizeof(this->color_descriptors));
 }
 
 void ui::Theme::replace_with(ui::Theme& other)
@@ -159,9 +162,10 @@ void ui::Theme::replace_with(ui::Theme& other)
 void ui::Theme::replace_without_meta(ui::Theme& other)
 {
 	/* this memcpy will only copy the images as a reference, and colors entirely */
-	memcpy(this->descriptors, other.descriptors, sizeof(this->descriptors));
-	for(u32 i = ui::theme::max_color + 1; i < ui::theme::max; ++i)
-		this->descriptors[i].image.isOwn = false;
+	memcpy(this->image_descriptors, other.image_descriptors, sizeof(this->image_descriptors));
+	memcpy(this->color_descriptors, other.color_descriptors, sizeof(this->color_descriptors));
+	for(u32 i = 0; i < ui::theme::imax; ++i)
+		this->image_descriptors[i].isOwn = false;
 }
 
 bool ui::Theme::parse(std::function<bool(u8 *, u32)> read_data, size_t size, u8 flags)
@@ -182,9 +186,9 @@ bool ui::Theme::parse(std::function<bool(u8 *, u32)> read_data, size_t size, u8 
 	num_descriptors = U32(hdr->num_descriptors);
 
 	if(format_version != 0) EXIT_LOG("theme parser: unknown/unsupported version %lu", format_version);
-	if(num_descriptors > DESCRIPTOR_MAX) EXIT_LOG("too many descriptors %lu", num_descriptors);
+	if(num_descriptors > DESCRIPTOR_MAX) EXIT_LOG("theme parser: too many descriptors %lu", num_descriptors);
 	/* this check should probably be done before we read the entire file */
-	if(size != 0x30 + 0x10 * num_descriptors + blob_size) EXIT_LOG("theme parser: file size as expected");
+	if(size != 0x30 + 0x10 * num_descriptors + blob_size) EXIT_LOG("theme parser: file size not as expected");
 
 	if(memcmp(hdr->magic, "HSTX", 4) != 0) EXIT_LOG("theme parser: invalid magic %.4s", hdr->magic);
 	ilog("theme parser: target_version is %s the current_version (%lu vs %u), v%lu theme",
@@ -231,7 +235,7 @@ bool ui::Theme::parse(std::function<bool(u8 *, u32)> read_data, size_t size, u8 
 		switch(ident)
 		{
                                                                            /* We want AGBR: do not byteswap */
-#define CVAL(fid, iid) case fid: this->descriptors[ui::theme::iid].color = (descriptors[i].data.color.value); break
+#define CVAL(fid, iid) case fid: this->color_descriptors[ui::theme::iid].color = (descriptors[i].data.color.value); break
 		CVAL(ID_BG_CLR, background_color);
 		CVAL(ID_TEXT_CLR, text_color);
 		CVAL(ID_BTN_BG_CLR, button_background_color);
@@ -249,6 +253,8 @@ bool ui::Theme::parse(std::function<bool(u8 *, u32)> read_data, size_t size, u8 
 		CVAL(ID_SMDH_BORDER_CLR, smdh_icon_border_color);
 		CVAL(ID_CHKBX_BORDER_CLR, checkbox_border_color);
 		CVAL(ID_CHKBX_CHK_CLR, checkbox_check_color);
+		CVAL(ID_GRAPH_LINE_CLR, graph_line_color);
+		CVAL(ID_WARN_CLR, warning_color);
 #undef CVAL
 #define IVAL(fid, iid) case fid: \
 	offset = U32(descriptors[i].data.image.img_ptr); \
@@ -260,10 +266,10 @@ bool ui::Theme::parse(std::function<bool(u8 *, u32)> read_data, size_t size, u8 
 		continue; \
 	} \
 	rgba_to_abgr(ptr, w, h); \
-	isReplacing = this->descriptors[ui::theme::iid].image.actual_image.tex != NULL && this->descriptors[ui::theme::iid].image.isOwn; \
-	if(isReplacing) delete_image_data(this->descriptors[ui::theme::iid].image.actual_image); \
-	load_rgba8(&this->descriptors[ui::theme::iid].image.actual_image, ptr, w, h, !isReplacing); \
-	this->descriptors[ui::theme::iid].image.isOwn = true; \
+	isReplacing = this->image_descriptors[ui::theme::iid].actual_image.tex != NULL && this->image_descriptors[ui::theme::iid].isOwn; \
+	if(isReplacing) delete_image_data(this->image_descriptors[ui::theme::iid].actual_image); \
+	load_abgr8(&this->image_descriptors[ui::theme::iid].actual_image, ptr, w, h, !isReplacing); \
+	this->image_descriptors[ui::theme::iid].isOwn = true; \
 	break
 		IVAL(ID_MORE_IMG, more_image);
 		IVAL(ID_BATTERY_IMG, battery_image);
@@ -343,7 +349,7 @@ void ui::ThemeManager::reget(const char *id)
 	if(it->second.len)
 		fill_colors(it->second);
 	for(ui::BaseWidget *w : it->second.slaves)
-		w->update_theme_hook(); 
+		w->update_theme_hook();
 }
 
 void ui::ThemeManager::reget()
@@ -351,10 +357,9 @@ void ui::ThemeManager::reget()
 	for(auto& it : this->slots)
 	{
 		if(it.second.len)
-
 			fill_colors(it.second);
 		for(size_t i = 0; i < it.second.slaves.size(); ++i)
-			it.second.slaves[i]->update_theme_hook(); 
+			it.second.slaves[i]->update_theme_hook();
 	}
 }
 

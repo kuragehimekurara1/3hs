@@ -29,7 +29,7 @@ Klik op UI_GLYPH_B als je dat niet wilt.
 Versie
 
 - prodcode
-Productie code
+Product code
 
 - size
 Grootte
@@ -115,9 +115,11 @@ ongeldig
 - title_doesnt_exist
 Titel bestaat niet: %1
 
-- netcon_lost
-Netwerk verbinding verloren (%1).
-We proberen het in $t seconden weer...
+- netcon_lost +code(_, number)
+##define S(zn) "Netwerk verbinding verloren (%1).\nWe proberen het in %2 " zn " weer..."
+if(p2 < 2) return S("secondes");
+else       return S("seconde");
+##undef S
 
 - about_app
 Informatie over applicatie
@@ -194,7 +196,7 @@ handmatig
 uitgeschakeled
 
 - patching_reboot
-Luma3DS Game Patching is ingeschakeld
+Luma3DS game patching is ingeschakeld
 Om de verandering te zien, moet je je 3DS herstarten
 
 - reboot_now
@@ -324,11 +326,9 @@ Nummer van 0 tot/met 255
 Gebruik deze ID om hulp te krijgen
 %1
 
-- block
-blok
-
-- blocks
-blokken
+- size_plus_block +code(_, number)
+if(p2 < 2) return "%1 (%2 blok)";
+else       return "%1 (%2 blokken)";
 
 - search_text
 Zoek op tekst
@@ -340,7 +340,7 @@ Vind met hShop ID
 Vind met titel ID
 
 - invalid_tid
-Ongeldige title ID
+Ongeldig titel ID
 
 - theme_installer_tid_bad
 Bekijk de "Themes" categorie als je op zoek wilt naar thema's
@@ -427,4 +427,50 @@ door %1
 
 - themes
 Themas
+
+- delete_unused_tickets
+Verwijder ongebruikte tickets
+
+- found_unused_tickets
+%1 ongebruikte tickets gevonden. Wil je ze verwijderen?
+
+- found_no_unused_tickets
+Geen ongebruikte tickets gevonden.
+
+- invalid_theme_preview
+Ongeldige thema voorvertoning op de server!
+
+- hint_add_queue
+UI_GLYPH_Y: voeg toe aan wachtrij
+
+- hint_preview_theme
+UI_GLYPH_X: bekijk thema
+
+- alt_name
+Alternatieve naam
+
+- show_alt
+Gebruik alternatieve naam
+
+- show_alt_desc
+Toont de alternatieve naam van een titel in de lijst als hij bestaat
+
+- default_reinst
+Herinstalleer altijd
+
+- default_reinst_desc
+Vraag wanneer je een titel hebt geïnstalleerd niet of je heb wel echt opnieuw wilt installeren
+
+- installing_game_x_of_y
+Wachtrij aan het installeren: %2/%3 voltooid
+%1
+
+- no_other_params_prod
+Je kan geen andere parameters gebruiken wanneer je op product code zoekt
+
+- invalid_prod
+Ongeldige product code
+
+- search_prod
+Vind met product code
 

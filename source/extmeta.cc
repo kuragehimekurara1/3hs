@@ -19,8 +19,10 @@
 #include <widgets/meta.hh>
 #include <ui/base.hh>
 
+#include "image_ldr.hh"
 #include "extmeta.hh"
 #include "thread.hh"
+#include "hsapi.hh"
 #include "queue.hh"
 #include "panic.hh"
 #include "i18n.hh"
@@ -28,8 +30,51 @@
 #include "ctr.hh"
 #include "log.hh"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <3rd/stb_image.h>
+
 
 enum class extmeta_return { yes, no, none };
+
+static void show_preview(const hsapi::Title& title)
+{
+	std::string png_data;
+	if(R_FAILED(hsapi::call(hsapi::get_theme_preview_png, png_data, (hsapi::hid) title.id)))
+		return;
+	int x, y;
+	u8 *bitmap = stbi_load_from_memory((const u8 *) png_data.data(), png_data.size(), &x, &y, NULL, 4);
+	/* invalid file */
+	if(!bitmap || x < ui::dimensions::width_top || y != ui::dimensions::height * 2)
+	{
+		ui::notice(STRING(invalid_theme_preview));
+		return;
+	}
+	u32 bottom_offset = 4 * x * (y / 2);
+
+	rgba_to_abgr((u32 *) bitmap, x, y);
+
+	C2D_Image bottom, top;
+	load_abgr8(&top, (u32 *) bitmap, x, ui::dimensions::height);
+	load_abgr8(&bottom, (u32 *) (bitmap + bottom_offset), x, ui::dimensions::height);
+
+	ui::RenderQueue queue;
+	ui::builder<ui::Sprite>(ui::Screen::top, ui::Sprite::image, (u32) &top)
+		.x(ui::layout::center_x)
+		.y(ui::layout::center_y)
+		.add_to(queue);
+	ui::builder<ui::Sprite>(ui::Screen::bottom, ui::Sprite::image, (u32) &bottom)
+		.x(ui::layout::center_x)
+		.y(ui::layout::center_y)
+		.add_to(queue);
+
+	ui::Keys keys = ui::RenderQueue::get_keys();
+	while(queue.render_exclusive_frame(keys) && !keys.kDown)
+		keys = ui::RenderQueue::get_keys();
+
+	delete_image(bottom);
+	delete_image(top);
+	free(bitmap);
+}
 
 /* don't call with exmeta_return::none */
 static bool to_bool(extmeta_return r)
@@ -40,17 +85,20 @@ static bool to_bool(extmeta_return r)
 static extmeta_return extmeta(ui::RenderQueue& queue, const hsapi::Title& base, const std::string& version_s, const std::string& prodcode_s)
 {
 	extmeta_return ret = extmeta_return::none;
+	ui::Text *press_to_install;
 	ui::Text *prodcode;
 	ui::Text *version;
 
 	ui::builder<ui::Text>(ui::Screen::top, STRING(press_to_install))
+		.size(0.42f, 0.42f)
 		.x(ui::layout::center_x)
-		.y(170.0f)
 		.wrap()
-		.add_to(queue);
+		.add_to(&press_to_install, queue);
+	press_to_install->set_y(ui::dimensions::height - press_to_install->height() - 10.0f);
 
 	/***
 	 * name (wrapped)
+	 * alt_name (maybe) (wrapped)
 	 * category -> subcategory
 	 *
 	 * "Press a to install, b to not"
@@ -76,6 +124,21 @@ static extmeta_return extmeta(ui::RenderQueue& queue, const hsapi::Title& base, 
 		.under(queue.back(), -1.0f)
 		.add_to(queue);
 
+	/* alternative name */
+	if(base.alt.size())
+	{
+		ui::builder<ui::Text>(ui::Screen::top, base.alt)
+			.x(9.0f)
+			.under(queue.back(), 1.0f)
+			.wrap()
+			.add_to(queue);
+		ui::builder<ui::Text>(ui::Screen::top, STRING(alt_name))
+			.size(0.45f)
+			.x(9.0f)
+			.under(queue.back(), -1.0f)
+			.add_to(queue);
+	}
+
 	/* category -> subcategory */
 	// on the bottom screen there are cases where this overflows,
 	// but i don't think that can happen on the top screen since it's a bit bigger
@@ -88,6 +151,28 @@ static extmeta_return extmeta(ui::RenderQueue& queue, const hsapi::Title& base, 
 		.x(9.0f)
 		.under(queue.back(), -1.0f)
 		.add_to(queue);
+
+	/* Button hint add to queue */
+	ui::builder<ui::Text>(ui::Screen::bottom, STRING(hint_add_queue))
+		.x(9.0f).y(7.0f)
+		.size(0.4f)
+		.add_to(queue);
+
+	/* only applies to themes */
+	if(base.cat == "themes")
+	{
+		/* Button hint preview theme */
+		ui::builder<ui::Text>(ui::Screen::bottom, STRING(hint_preview_theme))
+			.right(queue.back(), 5.0f).y(7.0f)
+			.size(0.4f)
+			.add_to(queue);
+
+		ui::builder<ui::ButtonCallback>(ui::Screen::top, KEY_X)
+			.connect(ui::ButtonCallback::kdown, [&base](u32) -> bool { ui::RenderQueue::global()->render_and_then([&base]() -> void {
+					show_preview(base);
+				}); return true; })
+			.add_to(queue);
+	}
 
 	/* version */
 	ui::builder<ui::Text>(ui::Screen::bottom, version_s)
@@ -174,10 +259,10 @@ bool show_extmeta_lazy(const hsapi::Title& base, hsapi::FullTitle *full)
 	ui::RenderQueue queue;
 	bool ret = true;
 
-	std::string version, prodcode;
+	std::string version, prodcode, alt;
 
-	ctr::thread<std::string&, std::string&, ui::RenderQueue&, hsapi::FullTitle *> th([&base]
-			(std::string& version, std::string& prodcode, ui::RenderQueue& queue, hsapi::FullTitle *fullptr) -> void {
+	ctr::thread<std::string&, std::string&, std::string&, ui::RenderQueue&, hsapi::FullTitle *> th([&base]
+			(std::string& version, std::string& prodcode, std::string& alt, ui::RenderQueue& queue, hsapi::FullTitle *fullptr) -> void {
 		hsapi::FullTitle full;
 		if(R_FAILED(hsapi::title_meta(full, base.id)))
 			return;
@@ -185,8 +270,9 @@ bool show_extmeta_lazy(const hsapi::Title& base, hsapi::FullTitle *full)
 			*fullptr = full;
 		version = hsapi::parse_vstring(full.version) + " (" + std::to_string(full.version) + ")";
 		prodcode = full.prod;
+		alt = full.alt;
 		queue.signal(ui::RenderQueue::signal_cancel);
-	}, version, prodcode, queue, full);
+	}, -1, version, prodcode, alt, queue, full);
 
 	extmeta_return res = extmeta(queue, base, STRING(loading), STRING(loading));
 	/* second thread returned more data */

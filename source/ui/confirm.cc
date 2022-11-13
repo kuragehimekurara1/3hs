@@ -73,7 +73,7 @@ void ui::Confirm::set_y(float y)
 	this->adjust();
 }
 
-bool ui::Confirm::render(const ui::Keys& keys)
+bool ui::Confirm::render(ui::Keys& keys)
 {
 	if(keys.kDown & (KEY_B | KEY_A))
 		END(keys.kDown & KEY_A);

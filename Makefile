@@ -34,7 +34,7 @@ include $(DEVKITARM)/3ds_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	3hs
 BUILD			:=	build
-SOURCES		:= 	source source/ui source/widgets source/hlink 3rd/nnc/source
+SOURCES		:= 	source source/ui source/widgets source/hlink 3rd/nnc/source source/audio
 DATA			:=	data
 INCLUDES	:=	include 3rd 3rd/3rd .
 GRAPHICS	:=	gfx gfx/bun
@@ -52,13 +52,18 @@ APP_AUTHOR			:=	hShop
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 
-CFLAGS	:= -pedantic -Wall -Wextra -mword-relocations \
-			-fcompare-debug-second -ffunction-sections $(ARCH) \
+CFLAGS	:= -Wall -Wextra -mword-relocations \
+			-fcompare-debug-second -ffunction-sections $(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM11 -D__3DS__ -D_3DS
+CFLAGS	+=	$(INCLUDE) -DARM11 -D__3DS__ -D_3DS \
+	-isystem/opt/devkitpro/devkitARM/arm-none-eabi/include/c++/12.2.0 -isystem/opt/devkitpro/devkitARM/arm-none-eabi/include/c++/12.2.0/arm-none-eabi
+
+WRAPFLAGS :=
+
+CFLAGS += $(WRAPFLAGS)
 
 ASFLAGS	:=	$(ARCH)
-LDFLAGS	=	-specs=3dsx.specs $(ARCH) -Wl,-Map,$(notdir $*.map)
+LDFLAGS	=	-specs=3dsx.specs $(ARCH) -Wl,-Map,$(notdir $*.map) $(WRAPFLAGS)
 
 ifneq ($(RELEASE),)
 	CFLAGS	+= -DRELEASE -O2
@@ -217,8 +222,8 @@ all: $(REAL_ALL)
 _build_all:
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
-$(BUILD)/romfs.bin: $(ROMFS_FILES)
-	$(SILENTCMD) 3dstool -ctf romfs $(BUILD)/romfs.bin --romfs-dir romfs
+$(BUILD)/romfs.bin: $(ROMFS_FILES) $(ROMFS)/gfx/next.t3x
+	$(SILENTCMD) 3dstool -ctf romfs $(BUILD)/romfs.bin --romfs-dir $(ROMFS)
 	$(SILENTMSG) built ... romfs.bin
 
 $(BUILD)/icon.smdh: $(CIA_PREFIX)/icon.png
@@ -290,6 +295,10 @@ $(OUTPUT).elf	:	$(OFILES)
 #---------------------------------------------------------------------------------
 %.bin.o	%_bin.h :	%.bin
 #---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	@$(bin2o)
+
+%.hstx.o	%_hstx.h :	%.hstx
 	@echo $(notdir $<)
 	@$(bin2o)
 

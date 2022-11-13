@@ -16,38 +16,34 @@
 
 #include <ui/base.hh> /* for UI_GLYPH_* */
 
-#ifndef HS_SITE_LOC
-	/* do not translate this */
-	#define PAGE_3HS "(unset)"
-	#define PAGE_THEMES "(unset)"
-#else
-	#define PAGE_3HS HS_SITE_LOC "/3hs"
-	#define PAGE_THEMES HS_SITE_LOC "/wiki/theme-installation"
-#endif
-
 #include "settings.hh"
 #include "panic.hh"
 #include "i18n.hh"
 
 #include <3ds.h>
 
-#define RAW(lid, sid) lang_strtab[lid][sid]
 #include "i18n_tab.cc"
 
 const char *i18n::getstr(str::type id)
 {
-	return RAW(get_nsettings()->lang, id);
+	I18NStringStore *store = RAW(get_nsettings()->lang, id);
+	panic_assert(!(store->info & INFO_ISFUNC), "attempt to get parameter-less function");
+	return store->string;
 }
 
-const char *i18n::getstr(str::type sid, lang::type lid)
+const char *i18n::getstr_param(str::type id, const std::vector<std::string>& params)
 {
-	return RAW(lid, sid);
+	I18NStringStore *store = RAW(get_nsettings()->lang, id);
+	if(store->info & INFO_ISFUNC)
+		return store->function(params);
+	else
+		return store->string;
 }
 
 const char *i18n::getsurestr(str::type sid)
 {
 	ensure_settings();
-	return RAW(get_nsettings()->lang, sid);
+	return i18n::getstr(sid);
 }
 
 // https://www.3dbrew.org/wiki/Country_Code_List
@@ -55,12 +51,14 @@ const char *i18n::getsurestr(str::type sid)
 namespace CountryCode
 {
 	enum _codes {
-		canada  = 18,
-		greece  = 79,
-		hungary = 80,
-		latvia  = 84,
-		poland  = 97,
-		romania = 99,
+		canada         =  18,
+		greece         =  79,
+		hungary        =  80,
+		latvia         =  84,
+		poland         =  97,
+		romania        =  99,
+		spain          = 105,
+		united_kingdom = 110,
 	};
 }
 
@@ -68,6 +66,8 @@ namespace CountryCode
 namespace ProvinceCode
 {
 	enum _codes {
+		uk_wales      =  5,
+		sp_catalonia  = 11,
 		japan_osaka   = 28,
 		japan_okinawa = 48,
 	};
@@ -93,6 +93,14 @@ lang::type i18n::default_lang()
 	case CountryCode::latvia: return lang::latvian;
 	case CountryCode::poland: return lang::polish;
 	case CountryCode::greece: return lang::greek;
+	case CountryCode::spain:
+		if(countryinfo[2] == ProvinceCode::sp_catalonia)
+			return lang::catalan;
+		break;
+	case CountryCode::united_kingdom:
+		if(countryinfo[2] == ProvinceCode::uk_wales)
+			return lang::welsh;
+		break;
 	}
 
 	switch(syslang)

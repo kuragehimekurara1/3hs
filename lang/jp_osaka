@@ -117,7 +117,7 @@ hShop ID
 
 - netcon_lost
 ネットワーク接続が失われた(%1)。
-$t秒で再試行する。..
+%2秒で再試行する。..
 
 - about_app
 3hsの詳細
@@ -324,11 +324,8 @@ LumaLocaleオートセッターのモードを設定する。 自動は言語を
 このIDを使用してサポートを取得する：
 %1
 
-- block
-ブロック
-
-- blocks
-ブロック
+- size_plus_block
+%1 (%2 ブロック)
 
 - search_text
 テキストで検索
@@ -427,4 +424,60 @@ UI_GLYPH_DPAD_CLEAR/UI_GLYPH_CPAD: ナビゲート
 このコンソールのENVINFOによると、こら開発ユニットです。
 このシステムでは3hsは正しゅう機能しまへん。
 リテール3DSを使用してる場合は、Luma3DS構成の「Enable developer UNITINFO」が無効になってること確認してくれへん。
+
+- delete_unused_tickets
+未使用のチケットを削除する
+
+- found_unused_tickets
+未使用のチケットが％1見つかった。 それらを削除するか？
+
+- found_no_unused_tickets
+未使用のチケットは見つかりまへんでした。
+
+# informing user that the preview image (for themes) that was on the server was unable to be displayed
+- invalid_theme_preview
+サーバーから取得したテーマのプレビューがチャラやねん！
+
+- hint_add_queue
+UI_GLYPH_Y: キューに追加
+
+- hint_preview_theme
+UI_GLYPH_X: テーマのプレビュー
+
+# used in extmeta for the alternative name, only used in japanese titles for now
+- alt_name
+代替名
+
+# setting title
+- show_alt
+別名を表示
+
+# setting description
+- show_alt_desc
+利用可能な場合は、代替名を表示する。
+
+# setting title
+- default_reinst
+デフォルトで再インストール
+
+# setting description
+- default_reinst_desc
+デフォルトで再インストールする。 既にインストールされてるタイトルの削除を明示的に要求せえへんでください。
+
+# shown while installing a queue on the other screen
+#  %1 = current game title
+#  %2 = total titles
+#  %3 = current position in the queue
+- installing_game_x_of_y
+処理キュー: %2/%3
+%1
+
+- no_other_params_prod
+商品コード指定時に他のパラメータは指定できまへん
+
+- invalid_prod
+製品コードが無効です
+
+- search_prod
+商品コードから探す
 

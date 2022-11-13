@@ -74,7 +74,7 @@ namespace ui
 
 		void finalize() override { this->update(); }
 
-		bool render(const ui::Keys& keys) override
+		bool render(ui::Keys& keys) override
 		{
 			/* handle input */
 			u32 effective = keys.kDown | keys.kHeld;
@@ -137,8 +137,8 @@ namespace ui
 			if(effective & KEY_RIGHT)
 			{
 				this->buttonTimeout = button_timeout;
-				this->view = this->min<size_t>(this->view + this->amountRows, this->last_full_view());
-				this->pos = this->min<size_t>(this->pos + this->amountRows, this->lines.size() - 1);
+				this->view = this->min<size_t>(this->view + this->amountRows - 1, this->last_full_view());
+				this->pos = this->min<size_t>(this->pos + this->amountRows - 1, this->lines.size() - 1);
 				this->on_change_(this, this->pos);
 				this->update_scrolldata();
 			}
@@ -231,7 +231,7 @@ builtin_controls_done:
 
 		void connect(connect_type t, u32 k)
 		{
-			if(t != buttons) panic("EINVAL");
+			panic_assert(t == buttons, "EINVAL");
 			this->keys |= k;
 		}
 
@@ -293,7 +293,7 @@ builtin_controls_done:
 		{
 			if(p < this->lines.size())
 			{
-				this->view = this->min<size_t>(p > 2 ? p - 2 : p, this->last_full_view());
+				this->view = this->min<size_t>(p > 2 ? p - 2 : 0, this->last_full_view());
 				this->pos = p;
 				this->update_scrolldata();
 			}
@@ -344,7 +344,7 @@ builtin_controls_done:
 			std::string s = this->to_string_(val);
 			this->alloc(s.size() + 1 /* +1 for NULL term */);
 			this->lines.emplace_back();
-			C2D_TextParse(&this->lines.back(), this->buf, s.c_str());
+			ui::parse_text(&this->lines.back(), this->buf, s.c_str());
 			C2D_TextOptimize(&this->lines.back());
 		}
 

@@ -25,27 +25,6 @@
 #include "i18n.hh"
 #include "log.hh"
 
-/* because you can't copy a u8[0x10] but you can a struct containing a u8[0x10].... */
-typedef struct Seed
-{
-	u8 seed[0x10];
-} Seed;
-
-typedef struct SeedDBHeader
-{
-	u32 size;
-	u8 pad[0xC];
-} SeedDBHeader;
-
-typedef struct SeedDBEntry
-{
-	u64 tid;
-	Seed seed;
-	u8 pad[0x8];
-} SeedDBEntry;
-
-static std::unordered_map<u64 /* tid */, Seed /* seed */> g_seeddb;
-
 // from FBI:
 // https://github.com/Steveice10/FBI/blob/6e3a28e4b674e0d7a6f234b0419c530b358957db/source/core/http.c#L440-L453
 static Result FSUSER_AddSeed(u64 tid, const void *seed)
@@ -65,31 +44,17 @@ static Result FSUSER_AddSeed(u64 tid, const void *seed)
 	return ret;
 }
 
-void init_seeddb()
+Result add_seed(hsapi::FullTitle title)
 {
-	FILE *f = fopen("romfs:/seeddb.bin", "r");
-	if(f == nullptr) panic(STRING(failed_open_seeddb));
-	SeedDBHeader head;
-
-	fread(&head, sizeof(SeedDBHeader), 1, f);
-	SeedDBEntry *entries = new SeedDBEntry[head.size];
-	fread(entries, sizeof(SeedDBEntry), head.size, f);
-
-	for(size_t i = 0x0; i < head.size; ++i)
-		g_seeddb[entries[i].tid] = entries[i].seed;
-
-	delete [] entries;
-	fclose(f);
-}
-
-Result add_seed(u64 tid)
-{
-	if(g_seeddb.count(tid) == 0)
+	if(!title.seed.size()) // title does not have a known seed, or doesn't use one
 	{
-		ilog("Not adding seed for %016llX", tid);
+		ilog("Not adding seed for %016llX", title.tid);
 		return 0x0;
 	}
-	ilog("Adding seed for %016llX", tid);
-	return FSUSER_AddSeed(tid, g_seeddb[tid].seed);
+	ilog("Adding seed for %016llX", title.tid);
+	nnc_u128 seed_as_int = nnc_u128_from_hex(title.seed.c_str());
+	nnc_u8 seed[0x10];
+	nnc_u128_bytes_be(&seed_as_int, seed);
+	return FSUSER_AddSeed(title.tid, seed);
 }
 

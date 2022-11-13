@@ -20,6 +20,7 @@
 
 #include <ui/base.hh>
 
+#include "audio/player.h"
 #include "install.hh"
 #include "hsapi.hh"
 #include "i18n.hh"
@@ -27,6 +28,7 @@
 #include "log.hh"
 
 static bool gfx_is_init = false;
+bool ns_was_init = false;
 void gfx_was_init() { gfx_is_init = true; }
 
 Result init_services(bool& isLuma)
@@ -37,8 +39,8 @@ Result init_services(bool& isLuma)
 	isLuma = R_SUCCEEDED(svcConnectToPort(&lumaCheck, "hb:ldr"));
 	if(isLuma) svcCloseHandle(lumaCheck);
 
-	// Doesn't work in citra
 #define TRYINIT(service_pretty, func, ...) if(R_FAILED(res = (func))) do { elog("Failed to initialize " service_pretty ", %08lX", res); return res; } while(0)
+	// Doesn't work in citra
 	if(isLuma) TRYINIT("MCU::HWC", mcuHwcInit());
 	/* 1MiB */ TRYINIT("http:C", httpcInit(1024 * 1024));
 	TRYINIT("ptm:sysm", ptmSysmInit());
@@ -47,16 +49,20 @@ Result init_services(bool& isLuma)
 	TRYINIT("cfg:u", cfguInit());
 	TRYINIT("ndm:u", ndmuInit());
 	TRYINIT("apt", aptInit());
-	TRYINIT("ns", nsInit());
 	TRYINIT("fs", fsInit());
 	TRYINIT("am", amInit());
 	TRYINIT("ac", acInit());
+#undef TRYINIT
+	if(R_SUCCEEDED(nsInit()))
+		ns_was_init = true;
 
 	return res;
 }
 
 void exit_services()
 {
+	if(ns_was_init)
+		nsExit();
 	mcuHwcExit();
 	httpcExit();
 	ptmSysmExit();
@@ -66,7 +72,6 @@ void exit_services()
 	ndmuExit();
 	aptExit();
 	fsExit();
-	nsExit();
 	amExit();
 	acExit();
 }
@@ -123,7 +128,7 @@ void handle_error(const error_container& err, const std::string *label)
 		base = 0.0f;
 	}
 	pusherror(err, queue, base);
-	queue.render_finite_button(KEY_A);
+	queue.render_finite_button(KEY_A | KEY_B);
 }
 
 
@@ -147,11 +152,14 @@ void handle_error(const error_container& err, const std::string *label)
 	}
 
 	else
-	{
 		/* this will be the final focus shift so we don't need to revert the state after */
 		set_desc(STRING(fatal_panic));
-		set_focus(false);
-	}
+	set_focus(true);
+
+	/* disable the select command handler */
+	ui::set_select_command_handler([](u32) -> void { });
+	/* stop audio */
+	player_exit();
 
 	pusha(queue);
 	ui::builder<ui::Text>(ui::Screen::top, caller)
@@ -161,7 +169,7 @@ void handle_error(const error_container& err, const std::string *label)
 		.add_to(queue);
 
 	ui::RenderQueue::terminate_render();
-	queue.render_finite_button(KEY_A);
+	queue.render_finite_button(KEY_A | KEY_B);
 
 	exit(0);
 }
@@ -183,7 +191,7 @@ void handle_error(const error_container& err, const std::string *label)
 	while(aptMainLoop())
 	{
 		hidScanInput();
-		if(hidKeysDown() & KEY_A)
+		if(hidKeysDown() & (KEY_A | KEY_B))
 			break;
 		gfxFlushBuffers();
 		gfxSwapBuffers();
@@ -211,7 +219,8 @@ void handle_error(const error_container& err, const std::string *label)
 [[noreturn]] void panic_impl(const std::string& caller, Result res)
 {
 	elog("PANIC RESULT -- 0x%08lX", res);
-	if(!gfx_is_init) panic_preinit_impl(caller, "Failed, result: " + pad8code(res));
+	if(!gfx_is_init)
+		panic_preinit_impl(caller, "Failed, result: " + pad8code(res) + "\n" + get_error(res).sDesc);
 	ui::RenderQueue queue;
 
 	error_container err = get_error(res);
