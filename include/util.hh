@@ -34,7 +34,7 @@ private:
 	ui::ScopedWidget<ui::Text> text;
 	time_t in_pos_start;
 	float xpos, lastx;
-	int flags;
+	int flags = 0;
 
 };
 

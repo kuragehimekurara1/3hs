@@ -483,3 +483,127 @@ Code de produit invalide
 - search_prod
 Recherche par code de produit
 
+# scroll, setting title
+- disable_graph
+Désactiver le graphe de latence
+
+# setting description
+- disable_graph_desc
+Désactive le graphe de latence affiché lors de l'installation.
+
+# scroll, setting title
+- goto_region
+Région préférée
+
+# setting description
+- goto_region_desc
+Favorise cette région dans les sous-catégories si existant.
+
+- add_music
+Vous n'avez pas encore ajouté de musique!
+Essayez d'en mettre dans /3ds/3hs/music dans la carte SD.
+
+- add_playlist
+Vous n'avez pas encore ajouté de playlists!
+Essayez d'en ajouter dans l'option de gestion des playlists.
+
+# noscroll, Keep the [ ], it is used in a menu with other file names
+- add_file_act
+[ ajouter un fichier ]
+
+# noscroll, same as above
+- add_playlist_act
+[ ajouter une playlist ]
+
+# keyboard hint
+- new_playlist_name
+Nom de la playlist...
+
+# noscroll, Basic audio engine options (randomize, repeat, stereo)
+- basic_options
+Options de bases
+
+# noscroll, audio engine option
+- randomize
+Playlists aléatoires
+
+# noscroll, audio engine option
+- repeat
+Musique et playlists en boucle
+
+# noscroll, stereo ( = multichannel) audio option
+- stereo
+Stéreo
+
+# noscroll, Default playlist audio option
+- default_playlist
+Playlist par défaut
+
+# noscroll, other audio engine options (select current file/playlist, manage playlists), may be translated as miscelaneous
+- other
+Autres
+
+# button, this string is followed by two buttons, one with "file" and another with "playlist", selects a playlist/file to play
+- select
+Sélectionner...
+
+# button, keep lowercase, see comment on select
+- playlist
+playlist
+
+# button, keep lowercase, see comment on select
+- file
+fichier
+
+# button, save audio engine configuration
+- save
+Sauvegarder
+
+# button
+- manage_playlists
+Gestion des playlists
+
+# Button in more menu that leads to audio configuration.
+- audio
+Audio
+
+# button that adds everything in this category as a filter
+- everything
+Tout dans cette catégorie
+
+# new search method, has the option of quick filtering of official content categories and the regions europe, north-america and japan
+- quick
+Rapide
+
+# new search method, has the option of filtering based on advanced filters like on the website
+- filters
+Filtres
+
+# Invalid title id error in new search
+- new_invalid_tid
+Le title ID est invalide.
+Les Titles IDs sont structurés comme ceci:
+0004000000186300
+
+# Invalid product code error in new search
+- new_invalid_prod
+Le code de produit est invalide.
+Les code de produit sont structurés comme ceci:
+CTR-P-COOL
+
+# Subtitle of the new search methods
+- press_to_switch
+Appuyez sur UI_GLYPH_L/UI_GLYPH_R pour changer de mode
+
+# Placeholder for empty search bar
+- empty
+(vide)
+
+# keyboard hint while filling the search bar for new search
+- enter_query
+Entrez votre recherche...
+
+# Submit new search and display results
+- submit
+Rechercher
+

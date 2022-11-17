@@ -2,6 +2,8 @@
 v1.4.0 "aequora viridia":
  - Fix issue where an unlisted title would crash 3hs
  - Fix issue where jumping a page in a list would skip an entry
+ - Fix issue where DSiWare that was already installed would not be detected
+ - Fix issue where it was possible to add duplicate titles to the queue
  - Make 3hs not remove every queue item if there was a failure, but only those that succeeded
  - Make 3hs always display the title currently being installed
  - Add a progress bar instead of spinner for deleting unused tickets

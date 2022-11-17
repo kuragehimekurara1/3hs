@@ -64,6 +64,14 @@ namespace i18n
 		std::string stringify(const T& arg)
 		{ return std::string(arg); }
 
+
+		// fallback for `char *`
+		template <typename T,
+			typename std::enable_if<
+				std::is_same<T, char *>::value,
+			bool>::type * = nullptr>
+		std::string stringify(const T& arg) { return std::string(arg); }
+
 		template <typename T>
 		std::string adv_getstr(str::type id, std::vector<std::string>& substs, const T& head)
 		{

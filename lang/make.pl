@@ -8,6 +8,7 @@ use utf8;
 
 my $build_dir = "build";
 my $lang_dir = "lang";
+my $print_missing = 0;
 
 # NOTE: The first language in this array
 #       will be used as the base language.
@@ -62,6 +63,14 @@ my @preserve_keywords = qw(
 );
 
 # ====================== #
+
+use Getopt::Long qw(:config no_auto_abbrev no_ignore_case bundling);
+
+GetOptions(
+	"lang|l=s", \$lang_dir,
+	"build|b=s", \$build_dir,
+	"print-missing|m", \$print_missing,
+) or die;
 
 -d $lang_dir or die "no language directory available.";
 -d $build_dir or die "no build directory available.";
@@ -216,7 +225,7 @@ EOF
 		}
 		else {
 			$main_table .= "\t\t\tSTUB($k),\n";
-			# print "$k\n";
+			print ($missing ? ", \033[1m$k\033[0m" : "\033[1m$k\033[0m") if $print_missing;
 			++$missing;
 		}
 	}
@@ -224,7 +233,12 @@ EOF
 
 	if(not $is_reference_lang) {
 		if($missing) {
-			print "\033[31;1m$missing\033[0m missing\n";
+			if($print_missing) {
+				print " are missing\n";
+			}
+			else {
+				print "\033[31;1m$missing\033[0m missing\n";
+			}
 			$total_missing += $missing;
 			++$langs_w_missing;
 		} else {

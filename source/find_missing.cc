@@ -69,8 +69,8 @@ ssize_t show_find_missing(hsapi::htid tid)
 		}
 
 		hsapi::BatchRelated related;
-		if(R_FAILED(hsapi::batch_related(related, installedGames)))
-			return;
+		Result res = hsapi::call<hsapi::BatchRelated&, const std::vector<hsapi::htid>&>(hsapi::batch_related, related, installedGames);
+		if(R_FAILED(res)) return;
 
 		std::vector<hsapi::FullTitle> potentialInstalls;
 

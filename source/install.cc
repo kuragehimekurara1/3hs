@@ -337,7 +337,7 @@ static Result net_cia_impl(get_url_func get_url, hsapi::htid tid, bool reinstall
 	if(data->type == ActionType::install)
 	{
 		bool tik   = ctr::ticket_exists(tid);
-		bool title = ctr::title_exists(tid);
+		bool title = ctr::title_exists(tid, dest);
 		if(tik && !title)
 			AM_DeleteTicket(tid);
 		if(reinstallable || ISET_DEFAULT_REINSTALL)

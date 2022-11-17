@@ -129,6 +129,7 @@ static int make_hstx_impl(FILE *out, char *in_buf, struct dynbuf *blob, const ch
 		ID_CHKBX_CHK_CLR     = 0x1017,
 		ID_GRAPH_LINE_CLR    = 0x1018,
 		ID_WARN_CLR          = 0x1019,
+		ID_X_CLR             = 0x101A,
 
 		ID_MORE_IMG          = 0x2001,
 		ID_BATTERY_IMG       = 0x2002,
@@ -264,6 +265,7 @@ static int make_hstx_impl(FILE *out, char *in_buf, struct dynbuf *blob, const ch
 		DEFCDESC("checkbox_check_colour", ID_CHKBX_CHK_CLR)
 		DEFCDESC("graph_line_colour", ID_GRAPH_LINE_CLR)
 		DEFCDESC("warning_colour", ID_WARN_CLR)
+		DEFCDESC("x_colour", ID_X_CLR)
 		/* */
 		DEFCDESC("smdh_icon_border_colour", ID_SMDH_BORDER_CLR)
 		DEFIDESC("more_image", ID_MORE_IMG)

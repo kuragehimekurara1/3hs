@@ -82,6 +82,7 @@ namespace ui
 			checkbox_check_color,
 			graph_line_color,
 			warning_color,
+			x_color,
 			cmax,
 			/* don't forget to update max_color when adding a color! */
 		};

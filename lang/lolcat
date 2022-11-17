@@ -1,0 +1,194 @@
+﻿
+## INCOMPLETE, DON'T ADD TO make.pl YET ##
+
+- native_name
+lolcat
+
+# scroll, setting title
+- disable_graph
+disabl latency gRaph plz?
+
+
+# setting description
+- disable_graph_desc
+disablez teh latency graPH that r showed wil enstalin  titl?? K?
+
+
+# scroll, setting title
+- goto_region
+oh hi JUmp to region
+
+
+# setting description
+- goto_region_desc
+jump To teh correct region in teh subcategory seleCSHUn if it exiSTZ??
+
+
+- add_music
+u HAZ not yet addd any music!??
+try puttin muSIc in /3ds/3hs/music On ur sd card
+ plz?
+
+
+- add_playlist
+u haz yet to add anY PLayliSts!??
+try addIn them wif teh MANAGe opsHUN
+
+
+# noscroll, Keep the [ ], it is used in a menu with other file names
+- add_file_act
+[ add Fil ]
+
+
+# noscroll, same as above
+- add_playlist_act
+[ add plaYLIs ]
+
+
+# keyboard hint
+- new_playlist_name
+neW PLaylis neme?????? plz?
+
+
+# noscroll, Basic audio engine options (randomize, repeat, stereo)
+- basic_options
+BAsic OPTionz
+
+
+
+
+
+
+# noscroll, audio engine option
+- randomize
+randomize playlistz
+
+
+# noscroll, audio engine option
+- repeat
+repeEt playlistz an songz K?
+
+
+# noscroll, stereo ( = multichannel) audio option
+- stereo
+stereo k?
+
+
+# noscroll, Default playlist audio option
+- default_playlist
+deefauLT plAYLis K?
+
+
+# noscroll, other audio engine options (select current file/playlist, manage playlists), may be translated as miscelaneous
+- other
+othr
+
+
+# button, this string is followed by two buttons, one with "file" and another with "playlist", selects a playlist/file to play
+- select
+oh hi select??????
+
+
+# button, keep lowercase, see comment on select
+- playlist
+playlis plz?
+
+
+# button, keep lowercase, see comment on select
+- file
+oh hi fil plz?
+
+
+# button, save audio engine configuration
+- save
+SAVE
+
+
+# button
+- manage_playlists
+manage playlisTz
+
+
+
+
+# Button in more menu that leads to audio configuration.
+- audio
+audio plz?
+
+
+# button that adds everything in this category as a filter
+- everything
+everyFIN in thiZ category
+
+
+# new search method, has the option of quick filtering of official content categories and the regions europe, north-america and japan
+- quick
+oh hi quik
+
+
+# new search method, has the option of filtering based on advanced filters like on the website
+- filters
+oh hi filterz
+
+
+# Invalid title id error in new search
+- new_invalid_tid
+errOR ENvalid tITL id inteRD
+titl idz iz usuale struCTurd liek thIS 000400000008B500
+
+
+# Invalid product code error in new search
+- new_invalid_prod
+error ENVALID product code interd
+prOduct codez iz usuale STRUCturd liek this CTR-P-ABCD
+
+
+# Subtitle of the new search methods
+- press_to_switch
+oh hi PREZ UI_GLYPH_L/UI_GLYPH_R to swich moDEz
+
+
+# Placeholder for empty search bar
+- empty
+(empty)
+
+
+# keyboard hint while filling the search bar for new search
+- enter_query
+oh hi intr ur kwery??????
+
+
+# Submit new search and display resulst
+- submit
+oh hI submit
+# label for content type selector for normal search
+- content_type
+contnt tYPE plz?
+
+# label for content type selector, to indicate that all content types are to be included
+- all
+AL K?
+
+# label for checkbox list of categories to include in quick search
+- include_content
+enclude CONTnt plz?
+
+# label for checkbox list of regions to include in quick search
+- regions
+reGionz
+
+# label for include filters of normal search
+- include_filters
+encludE fiLterz
+
+# label for exclude filters of normal search
+- exclude_filters
+excludE filterz plz?
+
+# button, adds a filter in normal search
+- add
+adD
+
+# search menu option to open normal search
+- normal_search
+normel SEerch

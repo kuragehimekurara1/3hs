@@ -41,11 +41,13 @@ std::vector<hsapi::FullTitle>& queue_get() { return g_queue; }
 
 void queue_add(const hsapi::FullTitle& meta)
 {
+	if (std::find(g_queue.begin(), g_queue.end(), meta) != g_queue.end()) return;
 	g_queue.push_back(meta);
 }
 
 void queue_add(hsapi::hid id, bool disp)
 {
+	if (std::find(g_queue.begin(), g_queue.end(), id) != g_queue.end()) return;
 	hsapi::FullTitle meta;
 	Result res = disp ? hsapi::call(hsapi::title_meta, meta, std::move(id))
 		: hsapi::scall(hsapi::title_meta, meta, std::move(id));

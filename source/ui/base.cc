@@ -828,6 +828,11 @@ void ui::Text::set_text(const std::string& label)
 	this->prepare_arrays();
 }
 
+void ui::Text::swap_slots(const StaticSlot& slot)
+{
+	UI_THIS_SWAP_SLOTS(slots);
+}
+
 /* core widget class Sprite */
 
 void ui::Sprite::setup(std::function<void(C2D_Sprite&, u32)> get_cb, u32 data)
@@ -1057,6 +1062,11 @@ void ui::Button::connect(connect_type type, std::function<bool()> callback)
 float ui::Button::textwidth()
 {
 	return this->widget->width();
+}
+
+void ui::Button::swap_slots(const StaticSlot& slot)
+{
+	this->widget->swap_slots(slot);
 }
 
 /* core widget class ButtonCallback */

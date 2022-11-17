@@ -551,6 +551,9 @@ static void vec_erase_if(std::vector<T>& vec, std::function<bool(const T&)> func
 UI_CTHEME_GETTER(color_warning, ui::theme::warning_color)
 UI_STATIC_SLOTS(WarningColorSlot, "__nsearch_warning_color", color_warning)
 
+UI_CTHEME_GETTER(color_x, ui::theme::x_color)
+UI_STATIC_SLOTS(XColorSlot, "__nsearch_x_color", color_x)
+
 static std::string extract_category_from_filter(const std::string& filter)
 {
 	const char *str = filter.c_str();
@@ -650,7 +653,7 @@ static bool show_normal_search()
 
 	ui::CheckBox *inc_unofficial, *inc_games, *inc_updates, *inc_dlc, *inc_vc, *inc_dsi;
 	ui::CheckBox *reg_eur, *reg_usa, *reg_jpn, *reg_other;
-	ui::Text *cheading, *modehint, *include_content_txt;
+	ui::Text *cheading, *modehint, *widest_include_content;
 	ContentType ctype = ContentType::All;
 	ui::KBDEnabledButton *kbd;
 	size_t tabIndex = 0;
@@ -658,6 +661,9 @@ static bool show_normal_search()
 	ui::RenderQueue rq;
 
 	using kbd_checker_func = bool (*)(const std::string&);
+
+	constexpr float filter_padding = 5.0f;
+	constexpr float filter_div = (ui::screen_width(ui::Screen::bottom) - filter_padding * 2.0f) / 2.0f;
 
 	static constexpr int ntabs = 4;
 	static const kbd_checker_func checker_funcs[ntabs] = { is_valid_query, is_valid_query, is_tid, is_prod };
@@ -833,13 +839,13 @@ static bool show_normal_search()
 		.add_to(&submit, rq);
 
 	/* global filtering for content type */
-	ui::builder<ui::Text>(ui::Screen::bottom, TL("Content type"))
+	ui::builder<ui::Text>(ui::Screen::bottom, STRING(content_type))
 		.x(ui::layout::left)
 		.above(rq.back())
 		.add_to(rq);
 	rq.group_last(ctypeSelGrp);
 
-	const std::vector<std::string> ctypeLabels = { TL("All"), TL("Legit"), TL("Pirate Legit"), TL("Standard") };
+	const std::vector<std::string> ctypeLabels = { STRING(all), "Legit", "Pirate Legit", "Standard" };
 	static const std::vector<ContentType> ctypeValues = { ContentType::All, ContentType::Legit, ContentType::PirateLegit, ContentType::Standard };
 	ui::builder<ui::Selector<ContentType>>(ui::Screen::bottom, ctypeLabels, ctypeValues, &ctype)
 		.size_children(0.50f)
@@ -851,9 +857,10 @@ static bool show_normal_search()
 	rq.group_last(ctypeSelGrp);
 
 	/* setup for the quick tab */
-		ui::builder<ui::Text>(ui::Screen::bottom, TL("Include content"))
-			.size(0.6f).x(5.0f).under(kbd)
-			.add_to(&include_content_txt, rq);
+		ui::builder<ui::Text>(ui::Screen::bottom, STRING(include_content))
+			.size(0.6f).x(filter_padding).under(kbd)
+			.connect(ui::Text::max_width, filter_div)
+			.add_to(&widest_include_content, rq);
 		rq.group_last(groups[0]);
 
 #define OPT(label_content, output_var, ...)  \
@@ -868,40 +875,39 @@ static bool show_normal_search()
 				.add_to(rq); \
 			rq.group_last(groups[0]);
 
-		OPT(TL("Games"), &inc_games, align_x(rq.back(), 8.0f))
-		OPT(TL("Updates"), &inc_updates, align_x(inc_games))
-		OPT(TL("DLC"), &inc_dlc, align_x(inc_games))
-		OPT(TL("Virtual Console"), &inc_vc, align_x(inc_games))
-		OPT(TL("DSiWare"), &inc_dsi, align_x(inc_games))
-		OPT(TL("Other"), &inc_unofficial, align_x(inc_games))
+		OPT("Games", &inc_games, align_x(rq.back(), 8.0f))
+		OPT("Updates", &inc_updates, align_x(inc_games))
+		OPT("DLC", &inc_dlc, align_x(inc_games))
+		OPT("Virtual Console", &inc_vc, align_x(inc_games))
+		OPT("DSiWare", &inc_dsi, align_x(inc_games))
+		OPT(STRING(other), &inc_unofficial, align_x(inc_games))
 
 		bottomTab[0] = rq.back();
 
-		ui::builder<ui::Text>(ui::Screen::bottom, TL("Regions"))
-			.size(0.6f).right(include_content_txt, 20.0f).under(kbd)
+		ui::builder<ui::Text>(ui::Screen::bottom, STRING(regions))
+			.size(0.6f).x(filter_padding + filter_div).under(kbd)
+			.connect(ui::Text::max_width, filter_div)
 			.add_to(rq);
 		rq.group_last(groups[0]);
 
-		OPT(TL("North America"), &reg_usa, align_x(rq.back(), 8.0f))
-		OPT(TL("Europe"), &reg_eur, align_x(reg_usa))
-		OPT(TL("Japan"), &reg_jpn, align_x(reg_usa))
-		OPT(TL("Other"), &reg_other, align_x(reg_usa))
+		OPT("North America", &reg_usa, align_x(rq.back(), 8.0f))
+		OPT("Europe", &reg_eur, align_x(reg_usa))
+		OPT("Japan", &reg_jpn, align_x(reg_usa))
+		OPT(STRING(other), &reg_other, align_x(reg_usa))
 
 #undef OPT
 	/* setup for the filters tab */
-		constexpr float filter_padding = 5.0f;
-		constexpr float filter_div = (ui::screen_width(ui::Screen::bottom) - filter_padding * 2.0f) / 2.0f;
-
-		const char *filterLabels[] = { TL("Include filters"), TL("Exclude filters") };
+		const char *filterLabels[] = { STRING(include_filters), STRING(exclude_filters) };
 		for(int i = 0; i < 2; ++i)
 		{
 			ui::builder<ui::Text>(ui::Screen::bottom, filterLabels[i])
 				.size(0.60f).x(filter_padding + filter_div*i)
+				.connect(ui::Text::max_width, filter_div)
 				.under(kbd)
 				.add_to(&filterTexts[i][0], rq);
 			rq.group_last(groups[1]);
 
-			ui::builder<ui::Button>(ui::Screen::bottom, TL("Add"))
+			ui::builder<ui::Button>(ui::Screen::bottom, STRING(add))
 				.align_x(rq.back()).under(rq.back()).wrap()
 				.connect(ui::Button::click, [i, &filterTexts, &filterGroups, &filterCount, &addButtons, &bottomTab, &ctypeSelGrp]() -> bool {
 					ui::RenderQueue::global()->render_and_then([i, &filterTexts, &filterGroups, &filterCount, &addButtons, &bottomTab, &ctypeSelGrp]() -> void {
@@ -943,6 +949,7 @@ static bool show_normal_search()
 				ui::builder<ui::Button>(ui::Screen::bottom, "X")
 					.size_children(0.45f) /* temp */
 					.wrap()
+					.swap_slots(XColorSlot)
 					.align_x(filterTexts[i][0], 4.0f)
 					/* y pos is set later */
 					.connect(ui::Button::nobg)
@@ -1012,7 +1019,7 @@ void show_search()
 
 	ui::RenderQueue queue;
 	ui::builder<ui::MenuSelect>(ui::Screen::bottom)
-		.connect(ui::MenuSelect::add, TL("Normal search"), show_normal_search)
+		.connect(ui::MenuSelect::add, STRING(normal_search), show_normal_search)
 		.connect(ui::MenuSelect::add, STRING(search_text), show_searchbar_search)
 		.connect(ui::MenuSelect::add, STRING(search_id), show_id_search)
 		.connect(ui::MenuSelect::add, STRING(search_tid), show_tid_search)

@@ -127,7 +127,10 @@ const std::string *next::sel_sub(const std::string& cat, size_t *cursor, bool vi
 		{
 			auto cat = std::find_if(rcat->subcategories.begin(), rcat->subcategories.end(), [scname](const hsapi::Subcategory& sc) -> bool { return sc.name == scname; });
 			if(cat != rcat->subcategories.end())
+			{
 				list->set_pos(std::distance(rcat->subcategories.begin(), cat));
+				meta->set_sub(*cat);
+			}
 		}
 	}
 	queue.render_finite();

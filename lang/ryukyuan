@@ -481,3 +481,183 @@ UI_GLYPH_X: テーマのプレビュー
 - search_prod
 あちねーむんコードからかめーいん
 
+﻿# scroll, setting title
+- disable_graph
+レイテンシグラフ無効なすん
+
+
+# setting description
+- disable_graph_desc
+タイトルぬインストール中んかい表示さりーるレイテンシグラフ無効なさびーん。
+
+
+# scroll, setting title
+- goto_region
+サブリージョンんかいジャンプ
+
+
+# setting description
+- goto_region_desc
+存在するばー、サブカテゴリーぬ選択っし正しさるサブリージョンんかいジャンプさびーん。
+
+
+- add_music
+なーら楽曲いりしーいびらん！
+SDカードぬ /3ds/3hs/music んかい音楽入ってぃんーちくぃみそーれー
+
+
+- add_playlist
+なーらプレイリストいりしーいびらん！
+管理オプションっしすりらいりしーてぃんーちくぃみそーれー
+
+
+# noscroll, Keep the [ ], it is used in a menu with other file names
+- add_file_act
+[ ファイル追加 ]
+
+
+# noscroll, same as above
+- add_playlist_act
+[ プレイリスト追加 ]
+
+
+# keyboard hint
+- new_playlist_name
+みーさるプレイリストぬなめー...
+
+
+# noscroll, Basic audio engine options (randomize, repeat, stereo)
+- basic_options
+ベーシックオプション
+
+
+# noscroll, audio engine option
+- randomize
+プレイリストランダム化すん
+# noscroll, audio engine option
+- repeat
+プレイリストとぅ楽曲繰いけーすん
+
+
+# noscroll, stereo ( = multichannel) audio option
+- stereo
+ステレオ
+
+
+# noscroll, Default playlist audio option
+- default_playlist
+デフォルトぬプレイリスト
+
+
+# noscroll, other audio engine options (select current file/playlist, manage playlists), may be translated as miscelaneous
+- other
+すぬ他
+
+
+# button, this string is followed by two buttons, one with "file" and another with "playlist", selects a playlist/file to play
+- select
+選択する...
+
+
+# button, keep lowercase, see comment on select
+- playlist
+プレイリスト
+
+
+# button, keep lowercase, see comment on select
+- file
+ファイル
+
+
+# button, save audio engine configuration
+- save
+保存
+
+
+# button
+- manage_playlists
+プレイリスト管理
+
+
+# Button in more menu that leads to audio configuration.
+- audio
+オーディオ
+
+
+
+
+# button that adds everything in this category as a filter
+- everything
+くぬカテゴリーぬまじり
+
+
+# new search method, has the option of quick filtering of official content categories and the regions europe, north-america and japan
+- quick
+ぐるさん
+
+
+# new search method, has the option of filtering based on advanced filters like on the website
+- filters
+フィルター
+
+
+# Invalid title id error in new search
+- new_invalid_tid
+エラー: 無効なタイトルIDぬ入力さりやびたん
+タイトルIDーふぃーじー、次ぬぐとーる構造なとーいびーん: 000400000008B500
+
+
+# Invalid product code error in new search
+- new_invalid_prod
+エラー: 無効な製品コードぬ入力さりやびたん
+製品コードーふぃーじー、次ぬぐとーる構造なとーいびーん: CTR-P-ABCD
+
+
+# Subtitle of the new search methods
+- press_to_switch
+UI_GLYPH_L/UI_GLYPH_R うちモード切り替いやびーん
+
+
+# Placeholder for empty search bar
+- empty
+(空)
+
+
+# keyboard hint while filling the search bar for new search
+- enter_query
+クエリ入力しくぃみそーれー...
+
+
+# Submit new search and display resulst
+- submit
+送信# label for content type selector for normal search
+- content_type
+コンテンツぬタイプ
+
+# label for content type selector, to indicate that all content types are to be included
+- all
+まじり
+
+# label for checkbox list of categories to include in quick search
+- include_content
+コンテンツ含みーん
+
+# label for checkbox list of regions to include in quick search
+- regions
+地域
+
+# label for include filters of normal search
+- include_filters
+フィルター含みーん
+
+# label for exclude filters of normal search
+- exclude_filters
+フィルターぬ除外
+
+# button, adds a filter in normal search
+- add
+追加
+
+# search menu option to open normal search
+- normal_search
+ふぃーじーぬ検索

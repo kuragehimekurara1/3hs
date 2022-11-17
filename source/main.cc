@@ -309,8 +309,8 @@ int main(int argc, char* argv[])
 	atexit(acfg_free);
 
 	player_set_switch_callback([](const struct cwav *cwav) -> void {
-		if(cwav->artist) set_status("Playing " + std::string(cwav->title) + " by " + std::string(cwav->artist));
-		else             set_status("Playing " + std::string(cwav->title));
+		if(cwav->artist) set_status(PSTRING(playing_x_by_y, cwav->title, cwav->artist));
+		else             set_status(PSTRING(playing_x, cwav->title));
 	});
 
 	panic_assert(acfg_realise() == ACE_NONE, "failed to set audio configuration");

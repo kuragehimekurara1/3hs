@@ -89,10 +89,10 @@ Licht thema
 Downloads voortzetten
 
 - load_space
-Laad bruikbare opslag indicator
+Toon bruikbare opslag indicator
 
 - show_battery
-Laad batterij indicator
+Toon batterij indicator
 
 - time_format
 Tijdsformaat
@@ -265,7 +265,7 @@ Hervat installaties wanneer zij onderbroken worden
 Laad de vrije opslag balk
 
 - show_battery_desc
-Laat de status van de batterij zien
+Toon de status van de batterij
 
 - time_format_desc
 Jouw favoriete tijd formaat. 24h of 12h. In Nederland wordt 24h het vaakst gebruikt
@@ -473,4 +473,122 @@ Ongeldige product code
 
 - search_prod
 Vind met product code
+
+- disable_graph
+Schakel snelheidsgrafiek uit
+
+- disable_graph_desc
+Deze optie schakelt de senlheidsgrafiek uit die zich toont tijdens de installatie van een titel.
+
+- goto_region
+Spring naar een subregio
+
+- goto_region_desc
+Spring naar de in de subcategorie selectie naar de correcte subregio
+
+- add_music
+Je hebt nog geen muziek toegevoegt!
+Plaats de bestanden in /3ds/3hs/music op je SD kaart.
+
+- add_playlist
+Je hebt nog geen afspeellijsten toegevoegt!
+Voeg ze toe door op de "beheer"-knop te klikken
+
+- add_file_act
+[ voeg bestand toe ]
+
+- add_playlist_act
+[ voeg afspeellijst toe ]
+
+- new_playlist_name
+Nieuwe afspeellijst naam...
+
+- basic_options
+Algemene opties
+
+- randomize
+Speel afspeellijsten aselect af
+
+- repeat
+Herhaal afspeellijsten en liedjes
+
+- stereo
+Stereo
+
+- default_playlist
+Initiële afspeellijst
+
+- other
+Overig
+
+- select
+Selecteer...
+
+- playlist
+een afspeellijst
+
+- file
+een bestand
+
+- save
+Opslaan
+
+- manage_playlists
+Beheer afspeellijsten
+
+- audio
+Audio
+
+- everything
+Alles in deze categorie
+
+- quick
+Snel
+
+- filters
+Filters
+
+- new_invalid_tid
+Fout: ongeldige titel ID ingevoerd
+Titel IDs zien er gewoonlijk zo uit: 000400000008B500
+
+- new_invalid_prod
+Fout: ongeldige product code ingevoerd
+Product codes zien er gewoonlijk zo uit: CTR-P-ABCD
+
+- press_to_switch
+Klik op UI_GLYPH_L/UI_GLYPH_R om van modus te wisselen
+
+- empty
+(leeg)
+
+- enter_query
+Voer zoekopdracht in...
+
+- submit
+Zoek
+
+- content_type
+Titel type
+
+- all
+Alles
+
+- include_content
+Includeer
+
+- regions
+Regio's
+
+- include_filters
+Inclusies
+
+- exclude_filters
+Exclusies
+
+- add
+Voeg toe
+
+- normal_search
+Normale zoekmethode
 

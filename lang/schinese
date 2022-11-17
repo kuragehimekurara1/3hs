@@ -615,3 +615,184 @@ UI_GLYPH_X：预览主题
 
 - search_prod
 按产品代码搜索
+﻿# scroll, setting title
+- disable_graph
+禁用延迟图
+
+
+# setting description
+- disable_graph_desc
+禁用安装标题时显示的延迟图。
+
+
+# scroll, setting title
+- goto_region
+跳转到子区域
+
+
+# setting description
+- goto_region_desc
+如果存在，则跳转到子类别选择中的正确子区域。
+
+
+- add_music
+您还没有添加任何音乐！
+尝试将音乐放入 SD 卡上的 /3ds/3hs/music
+
+
+- add_playlist
+您还没有添加任何播放列表！
+尝试使用管理选项添加它们
+
+
+# noscroll, Keep the [ ], it is used in a menu with other file names
+- add_file_act
+[ 添加文件 ]
+
+
+# noscroll, same as above
+- add_playlist_act
+[ 添加播放列表 ]
+
+
+# keyboard hint
+- new_playlist_name
+新的播放列表名称...
+
+
+# noscroll, Basic audio engine options (randomize, repeat, stereo)
+- basic_options
+基本选项
+
+
+# noscroll, audio engine option
+- randomize
+随机播放列表
+
+
+# noscroll, audio engine option
+- repeat
+重复播放列表和歌曲
+
+
+# noscroll, stereo ( = multichannel) audio option
+- stereo
+立体声
+
+
+# noscroll, Default playlist audio option
+- default_playlist
+默认播放列表
+
+
+# noscroll, other audio engine options (select current file/playlist, manage playlists), may be translated as miscelaneous
+- other
+其他
+
+
+# button, this string is followed by two buttons, one with "file" and another with "playlist", selects a playlist/file to play
+- select
+选择...
+
+
+# button, keep lowercase, see comment on select
+- playlist
+播放列表
+
+
+# button, keep lowercase, see comment on select
+- file
+文件
+
+
+# button, save audio engine configuration
+- save
+节省
+
+
+# button
+- manage_playlists
+管理播放列表
+
+
+# Button in more menu that leads to audio configuration.
+- audio
+声音的
+
+
+# button that adds everything in this category as a filter
+- everything
+此类别中的所有内容
+
+
+# new search method, has the option of quick filtering of official content categories and the regions europe, north-america and japan
+- quick
+快的
+
+
+# new search method, has the option of filtering based on advanced filters like on the website
+- filters
+过滤器
+
+
+# Invalid title id error in new search
+- new_invalid_tid
+错误：输入的标题 ID 无效
+标题 ID 通常结构如下：000400000008B500
+
+
+# Invalid product code error in new search
+- new_invalid_prod
+错误：输入的产品代码无效
+产品代码的结构通常是这样的：CTR-P-ABCD
+
+
+# Subtitle of the new search methods
+- press_to_switch
+按 UI_GLYPH_L/UI_GLYPH_R 切换模式
+
+
+# Placeholder for empty search bar
+- empty
+(空的)
+
+
+# keyboard hint while filling the search bar for new search
+- enter_query
+输入您的查询...
+
+
+# Submit new search and display resulst
+- submit
+提交# label for content type selector for normal search
+- content_type
+内容类型
+
+# label for content type selector, to indicate that all content types are to be included
+- all
+全部
+
+# label for checkbox list of categories to include in quick search
+- include_content
+包括内容
+
+# label for checkbox list of regions to include in quick search
+- regions
+地区
+
+# label for include filters of normal search
+- include_filters
+包括过滤器
+
+# label for exclude filters of normal search
+- exclude_filters
+排除过滤器
+
+# button, adds a filter in normal search
+- add
+Add
+添加
+
+# search menu option to open normal search
+- normal_search
+正常搜索

@@ -149,7 +149,7 @@ Result install::gui::hs_cia(const hsapi::FullTitle& meta, bool interactive, bool
 	ui::ProgressBar *bar;
 	ui::RenderQueue queue;
 
-	make_queue(queue, &bar, label.size() ? label : PSTRING(installing_game, meta.name));
+	make_queue(queue, &bar, label.size() ? label : meta.name);
 
 	bool shouldReinstall = defaultReinstallable;
 	Result res = 0;

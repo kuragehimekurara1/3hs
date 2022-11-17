@@ -498,3 +498,124 @@ UI_GLYPH_X: посмотреть превью темы
 - search_prod
 Поиск по коду продукта
 
+# scroll, setting title
+- disable_graph
+Отключить график сетевой задержки
+
+# setting description
+- disable_graph_desc
+Отключает график сетевой задержки, который отображается во время установки.
+
+# scroll, setting title
+- goto_region
+Переходить к региону
+
+# setting description
+- goto_region_desc
+Переходить к подходящему региону в списке выбора подкатегории, если он присутствует.
+
+- add_music
+У вас пока нет никакой музыки!
+Попробуйте поместить музыку в директорию /3ds/3hs/music на вашей SD карте
+
+- add_playlist
+У вас пока нет никаких плейлистов!
+Попробуйте добавить плейлист в меню управления плейлистами
+
+# noscroll, Keep the [ ], it is used in a menu with other file names
+- add_file_act
+[ добавить файл ]
+
+# noscroll, same as above
+- add_playlist_act
+[ добавить плейлист ]
+
+# keyboard hint
+- new_playlist_name
+Название нового плейлиста...
+
+# noscroll, Basic audio engine options (randomize, repeat, stereo)
+- basic_options
+Общие настройки
+
+# noscroll, audio engine option
+- randomize
+Перемешивать плейлисты
+
+# noscroll, audio engine option
+- repeat
+Повторять плейлисты и песни
+
+# noscroll, stereo ( = multichannel) audio option
+- stereo
+Стерео
+
+# noscroll, Default playlist audio option
+- default_playlist
+Плейлист по умолчанию
+
+# noscroll, other audio engine options (select current file/playlist, manage playlists), may be translated as miscelaneous
+- other
+Дополнительно
+
+# button, this string is followed by two buttons, one with "file" and another with "playlist", selects a playlist/file to play
+- select
+Выбрать...
+
+# button, keep lowercase, see comment on select
+- playlist
+плейлист
+
+# button, keep lowercase, see comment on select
+- file
+файл
+
+# button, save audio engine configuration
+- save
+Сохранить
+
+# button
+- manage_playlists
+Управление плейлистами
+
+# Button in more menu that leads to audio configuration.
+- audio
+Аудио
+
+# button that adds everything in this category as a filter
+- everything
+Всё в этой категории
+
+# new search method, has the option of quick filtering of official content categories and the regions europe, north-america and japan
+- quick
+Быстрый
+
+# new search method, has the option of filtering based on advanced filters like on the website
+- filters
+Фильтры
+
+# Invalid title id error in new search
+- new_invalid_tid
+Ошибка: введён недопустимый Title ID
+Обычно Title ID выглядит так: 000400000008B500
+
+# Invalid product code error in new search
+- new_invalid_prod
+Ошибка: введён недопустимый код продукта
+Обычно код продукта выглядит так: CTR-P-ABCD
+
+# Subtitle of the new search methods
+- press_to_switch
+Нажмите UI_GLYPH_L/UI_GLYPH_R, чтобы сменить режим
+
+# Placeholder for empty search bar
+- empty
+(не задано)
+
+# keyboard hint while filling the search bar for new search
+- enter_query
+Введите ваш запрос...
+
+# Submit new search and display resulst
+- submit
+Отправить

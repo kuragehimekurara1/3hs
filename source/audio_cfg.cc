@@ -403,6 +403,7 @@ void show_audio_config()
 		.add_to(rq);
 
 	ui::builder<ui::Text>(ui::Screen::bottom, STRING(select))
+		.size(0.60f)
 		.under(rq.back()).align_x(opt_randomise)
 		.add_to(rq);
 
@@ -411,16 +412,18 @@ void show_audio_config()
 			ui::RenderQueue::global()->render_and_then(show_select_playlist);
 			return true;
 		})
+		.size_children(0.55f)
 		.wrap()
-		.align_y(rq.back()).right(rq.back(), 10.0f)
+		.under(rq.back()).align_x(rq.back(), 10.0f)
 		.add_to(rq);
 	ui::builder<ui::Button>(ui::Screen::bottom, STRING(file))
 		.connect(ui::Button::click, []() -> bool {
 			ui::RenderQueue::global()->render_and_then(show_select_file);
 			return true;
 		})
+		.size_children(0.55f)
 		.wrap()
-		.align_y(rq.back()).right(rq.back(), 8.0f)
+		.under(rq.back()).align_x(rq.back())
 		.add_to(rq);
 
 	ui::builder<ui::Button>(ui::Screen::bottom, STRING(manage_playlists))

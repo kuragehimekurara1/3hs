@@ -488,3 +488,156 @@ Cod de produs invalid
 - search_prod
 Căutați după cod de produs
 
+# scroll, setting title
+- disable_graph
+Opriți graficul latenței
+
+# setting description
+- disable_graph_desc
+Oprește graficul latenței afișat când instalați un titlu.
+
+# scroll, setting title
+- goto_region
+Săriți la subregiune
+
+# setting description
+- goto_region_desc
+Sare la subregiunea sistemului dacă o subcategorie a acesteia există.
+
+- add_music
+Nu ați adăugat încă muzică!
+Încercați să puneți muzica în /3ds/3hs/music pe cardul SD
+
+- add_playlist
+Nu ați adăugat încă nicio listă de cântece!
+încercați să adăugați una cu opțiunea de editare
+
+# noscroll, Keep the [ ], it is used in a menu with other file names
+- add_file_act
+[ adăugați fișier ]
+
+# noscroll, same as above
+- add_playlist_act
+[ adăugați listă ]
+
+# keyboard hint
+- new_playlist_name
+Nume nou listă...
+
+# noscroll, Basic audio engine options (randomize, repeat, stereo)
+- basic_options
+Opțiuni de bază
+
+# noscroll, audio engine option
+- randomize
+Rulați listele aleatoriu
+
+# noscroll, audio engine option
+- repeat
+Repetați liste și cântece
+
+# noscroll, stereo ( = multichannel) audio option
+- stereo
+Stereo
+
+# noscroll, Default playlist audio option
+- default_playlist
+Listă de cântece implicită
+
+# noscroll, other audio engine options (select current file/playlist, manage playlists), may be translated as miscelaneous
+- other
+Altele
+
+# button, this string is followed by two buttons, one with "file" and another with "playlist", selects a playlist/file to play
+- select
+Selectați...
+
+# button, keep lowercase, see comment on select
+- playlist
+listă
+
+# button, keep lowercase, see comment on select
+- file
+fișier
+
+# button, save audio engine configuration
+- save
+Salvați
+
+# button
+- manage_playlists
+Opțiuni listă
+
+# Button in more menu that leads to audio configuration.
+- audio
+Audio
+
+# button that adds everything in this category as a filter
+- everything
+Tot din această categorie
+
+# new search method, has the option of quick filtering of official content categories and the regions europe, north-america and japan
+- quick
+Rapid
+
+# new search method, has the option of filtering based on advanced filters like on the website
+- filters
+Filtre
+
+# Invalid title id error in new search
+- new_invalid_tid
+Eroare: ID de titlu invalid
+ID-urile de titlu sunt structurate așa: 000400000008B500
+
+# Invalid product code error in new search
+- new_invalid_prod
+Eroare: cod produs invalid
+Codurile de produs sunt de obicei structurate așa: CTR-P-ABCD
+
+# Subtitle of the new search methods
+- press_to_switch
+Apăsați UI_GLYPH_L/UI_GLYPH_R pentru a schimba modurile
+
+# Placeholder for empty search bar
+- empty
+(gol)
+
+# keyboard hint while filling the search bar for new search
+- enter_query
+Introduceți căutarea...
+
+# Submit new search and display resulst
+- submit
+Trimiteți
+
+# label for content type selector for normal search
+- content_type
+Tip conținut
+
+# label for content type selector, to indicate that all content types are to be included
+- all
+Toate
+
+# label for checkbox list of categories to include in quick search
+- include_content
+Includeți conținut
+
+# label for checkbox list of regions to include in quick search
+- regions
+Regiuni
+
+# label for include filters of normal search
+- include_filters
+Includeți filtru
+
+# label for exclude filters of normal search
+- exclude_filters
+Excludeți filtru
+
+# button, adds a filter in normal search
+- add
+Adăugați
+
+# search menu option to open normal search
+- normal_search
+Căutare normală

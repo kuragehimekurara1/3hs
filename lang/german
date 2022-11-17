@@ -304,9 +304,9 @@ Protokolle hochladen
 - clear_logs
 Protokolle löschen
 
-- found_missing
-%1 fehlende(r) Inhalt(e) gefunden.
-Du kannst sie in der Warteschlange installieren.
+- found_missing +code(number)
+if (p1 == 1) return "%1 fehlender Inhalt gefunden.\nDu kannst diesen in der Warteschlange installieren.";
+else return "%1 fehlende Inhalte gefunden.\nDu kannst diese in der Warteschlange installieren.";
 
 - found_0_missing
 Keine fehlenden Inhalte gefunden
@@ -430,8 +430,9 @@ Designs
 - delete_unused_tickets
 Nicht benötigte Tickets löschen
 
-- found_unused_tickets
-%1 nicht benötigte Tickets gefunden. Sollen diese entfernt werden?
+- found_unused_tickets +code(number)
+if (p1 == 1) return "%1 nicht benötigtes Ticket gefunden. Sollte dieses entfernt werden?";
+else return "%1 nicht benötigte Tickets gefunden. Sollen diese entfernt werden?";
 
 - found_no_unused_tickets
 Keine nicht benötigten Tickets wurden gefunden.
@@ -448,26 +449,18 @@ UI_GLYPH_X: Designvorschau
 - alt_name
 Alternativer Name
 
-# setting title
 - show_alt
 Alternative Namen anzeigen
 
-# setting description
 - show_alt_desc
 Alternative Namen anzeigen, wenn verfügbar
 
-# setting title
 - default_reinst
 Standardmäßig neuinstallieren
 
-# setting description
 - default_reinst_desc
 Standardmäßig Inhalte neuinstallieren; nicht fragen, ob ein bereits installierter Inhalt gelöscht werden soll.
 
-# shown while installing a queue on the other screen
-#  %1 = current game title
-#  %2 = total titles
-#  %3 = amount of titles already processed in this queue
 - installing_game_x_of_y
 Verarbeite Warteschlange: %2/%3
 %1
@@ -481,3 +474,120 @@ Ungültiger Produkt-Code
 - search_prod
 Mithilfe eines Produkt-Codes suchen
 
+- disable_graph
+Latenzgraf deaktivieren
+
+- disable_graph_desc
+Deaktiviert das Latenzgraf, dass beim installieren eines Inhalts angezeigt wird.
+
+- goto_region
+Zur Unterregion springen
+
+- goto_region_desc
+In der Unterkategorie-Auswahl zur richtigen Region sprigen, falls diese existiert.
+
+- add_music
+Du hast bisher keine Musik hinzugefügt!
+Versuch, Musikdateien in /3ds/3hs/music auf deiner SD-Karte zu legen.
+
+- add_playlist
+Du hast bisher keine Wiedergabelisten hinzugefügt!
+Versuch, Wiedergabelisten mit der "Verwalten"-Option hinzuzufügen.
+
+- add_file_act
+[ Datei hinzufügen ]
+
+- add_playlist_act
+[ Wiedergabeliste hinzufügen ]
+
+- new_playlist_name
+Name der neuen Wiedergabeliste...
+
+- basic_options
+Grundoptionen
+
+- randomize
+Wiedergabelisten mischen
+
+- repeat
+Wiedergabelisten und Songs wiederholen
+
+- stereo
+Stereo
+
+- default_playlist
+Standard-Wiedergabeliste
+
+- other
+Andere
+
+- select
+Auswählen...
+
+- playlist
+wiedergabeliste
+
+- file
+datei
+
+- save
+Speichern
+
+- manage_playlists
+Wiedergabelisten verwalten
+
+- audio
+Audio
+
+- everything
+Alles in dieser Kategorie
+
+- quick
+Schnellsuche
+
+- filters
+Filter
+
+- new_invalid_tid
+Fehler: ungültige Title-ID
+Title-IDs sind normalerweise so strukturiert: 000400000008B500
+
+- new_invalid_prod
+Fehler: ungültiger Produkt-Code
+Produkt-Codes sind normalerweise so strukturiert: CTR-P-ABCD
+
+- press_to_switch
+Drücke UI_GLYPH_L/UI_GLYPH_R um Modi umzuschalten
+
+- empty
+(leer)
+
+- enter_query
+Suchtext eingeben...
+
+- submit
+Absenden
+
+- content_type
+Inhaltstyp
+
+- all
+Alle
+
+- include_content
+Inhalt einbeziehen
+
+- regions
+Regionen
+
+- include_filters
+Inklusionsfilter
+
+- exclude_filters
+Exklusionsfilter
+
+- add
+Hinzufüfen
+
+- normal_search
+Normale Suche
