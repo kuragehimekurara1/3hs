@@ -6,100 +6,100 @@ lolcat
 
 # shown at the top of the screen during loading (the spinner)
 - loading
-Loading...
+oh hI loadin?????? plz?
 
 - luma_not_installed
-An unsupported firmware was detected.
+an unsuppORTd firmware were deetectd?? k?
 
 # displayed under above string
 - install_luma
-3hs cannot be used on this system.
+oh HI 3hz cannOT BE usD ON THIZ system??
 
 # button, button on bottom of screen to enter queue
 - queue
-Queue
+queUE plz?
 
 # networking means network libraries, may be translated as "failed to start application" if there exists no good translation for networking
 - fail_init_networking
-Failed to initialize networking
+faild to eniTIALize netWORKIn
 
 # PAGE_3HS expands to the 3hs page on hShop
 - credits_thanks
-Thank you for using 3hs, a 3DS client for hShop.
-You can get this software for free at
+thank U fr usin 3hs  3dz clint fr hshop??
+ u can get thiz software fr fre at
 PAGE_3HS
 
 - press_to_install
-Press UI_GLYPH_A to install this content.
-Press UI_GLYPH_B to go back.
+preZ UI_GLYPH_A to ensTel thiz contNT??
+PReZ UI_GLYPH_B TO GO Bak??
 
 # nowrap, used for title version, bottom screen metadata when you press A on a list item
 - version
-Version
+oh hi vershun k?
 
 # nowrap, used for title product code, same location as above string
 - prodcode
-Product Code
+product code K?
 
 # nowrap, used for title size, (sub)category size, displayed on bottom screen in the main list, sort method in switcher in settings
 - size
-Size
+oh HI size
 
 # nowrap, used for title name, (sub)category name, see above for location
 - name
-Name
+neme
 
 # nowrap, used for title id, extmeta & main list, sort method in switcher in settings
 - tid
-Title ID
+titl id
 
 # nowrap, used for content category, extmeta & main list
 - category
-Category
+category k?
 
 # nowrap, hShop ID used for searching, previously known as landing ID, sort method in switcher in settings
 - landing_id
-hShop ID
+hshop id plz?
 
 # nowrap, used for category description
 - description
-Description
+deeScripshun
 
 # nowrap, shown on bottom screen category selection
 - total_titles
-Total Titles
+totel titlez plZ?
 
 # nowrap, shown top screen category selection
 - select_cat
-Select a category
+selECt  category k?
 
 # nowrap, shown top screen subcategory selection
 - select_subcat
-Select a subcategory
+oh hi Select  subcategory plz?
 
 # nowrap, shown top screen title selection
 - select_title
-Select a title
+select  titl
 
 # the time format (15:00)
 - fmt_24h
-24 hour
+24 hour plZ?
 
 # time time format (3 PM)
 - fmt_12h
-12 hour
+12 houR PLZ?
 
 # unknown setting value
 - unknown
-unknown
+unknowN
 
 # setting is set to ON
 - btrue
-true
+true k?
 
 # setting is set to OFF
 - bfalse
-false
+oh hi fals
 
 # top screen in progress bar location settings switcher
 - top
@@ -107,11 +107,11 @@ top
 
 # bottom screen in progress bar location settings switcher
 - bottom
-bottom
+bottom k?
 
 # scroll, setting title, unused
 - light_mode
-Light mode
+
 
 # scroll, setting title
 - resume_dl
