@@ -6,152 +6,152 @@ lolcat
 
 # shown at the top of the screen during loading (the spinner)
 - loading
-oh hI loadin?????? plz?
+LOADIN...
 
 - luma_not_installed
-an unsuppORTd firmware were deetectd?? k?
+AN UNSUPPORTD FIRMWARE WUZ DETECTD.
 
 # displayed under above string
 - install_luma
-oh HI 3hz cannOT BE usD ON THIZ system??
+3HS CANT BE USD ON DIS SISTEM.
 
 # button, button on bottom of screen to enter queue
 - queue
-queUE plz?
+KEW
 
 # networking means network libraries, may be translated as "failed to start application" if there exists no good translation for networking
 - fail_init_networking
-faild to eniTIALize netWORKIn
+FAILD 2 INITIALIZE NETWORKIN
 
 # PAGE_3HS expands to the 3hs page on hShop
 - credits_thanks
-thank U fr usin 3hs  3dz clint fr hshop??
- u can get thiz software fr fre at
+THANK U 4 USIN 3HS, 3DZ CLIENT 4 HSHOP.
+U CAN GIT DIS SOFTWARE 4 FREE AT
 PAGE_3HS
 
 - press_to_install
-preZ UI_GLYPH_A to ensTel thiz contNT??
-PReZ UI_GLYPH_B TO GO Bak??
+PRES UI_GLYF_A 2 INSTALL DIS CONTENT.
+PRES UI_GLYF_B 2 GO BAK.
 
 # nowrap, used for title version, bottom screen metadata when you press A on a list item
 - version
-oh hi vershun k?
+VERSHUN
 
 # nowrap, used for title product code, same location as above string
 - prodcode
-product code K?
+PRODUCT CODE
 
 # nowrap, used for title size, (sub)category size, displayed on bottom screen in the main list, sort method in switcher in settings
 - size
-oh HI size
+SIZE
 
 # nowrap, used for title name, (sub)category name, see above for location
 - name
-neme
+NAYM
 
 # nowrap, used for title id, extmeta & main list, sort method in switcher in settings
 - tid
-titl id
+TITLE ID
 
 # nowrap, used for content category, extmeta & main list
 - category
-category k?
+KATEGORY
 
 # nowrap, hShop ID used for searching, previously known as landing ID, sort method in switcher in settings
 - landing_id
-hshop id plz?
+HSHOP ID
 
 # nowrap, used for category description
 - description
-deeScripshun
+DESCRIPSHUN
 
 # nowrap, shown on bottom screen category selection
 - total_titles
-totel titlez plZ?
+TOTAL TITLEZ
 
 # nowrap, shown top screen category selection
 - select_cat
-selECt  category k?
+SELECT KATEGORY
 
 # nowrap, shown top screen subcategory selection
 - select_subcat
-oh hi Select  subcategory plz?
+SELECT SUBKATEGORY
 
 # nowrap, shown top screen title selection
 - select_title
-select  titl
+SELECT TITLE
 
 # the time format (15:00)
 - fmt_24h
-24 hour plZ?
+24 HOUR
 
 # time time format (3 PM)
 - fmt_12h
-12 houR PLZ?
+12 HOUR
 
 # unknown setting value
 - unknown
-unknowN
+UNKNOWN
 
 # setting is set to ON
 - btrue
-true k?
+TRUE
 
 # setting is set to OFF
 - bfalse
-oh hi fals
+FALSE
 
 # top screen in progress bar location settings switcher
 - top
-top
+TOP
 
 # bottom screen in progress bar location settings switcher
 - bottom
-bottom k?
+BOTTOM
 
 # scroll, setting title, unused
 - light_mode
-
+LIGHT MODE
 
 # scroll, setting title
 - resume_dl
-Resume downloads
+RESUME DOWNLOADZ
 
 # scroll, setting title
 - load_space
-Show free space indicator
+SHOW FREE SPACE INDICATOR
 
 # scroll, setting title
 - show_battery
-Show battery level indicator
+SHOW BATTERY LEVEL INDICATOR
 
 # scroll, setting title
 - time_format
-Time format
+TIEM FORMAT
 
 # scroll, setting title
 - progbar_screen
-Progress bar position
+PROGRES BAR POSISHUN
 
 # scroll, setting title
 - language
-Language
+LANGUAGE
 
 # value of setting
 - value_x
-Value: %1
+VALUE: %1
 
 # back button
 - back
-Back
+BAK
 
 # invalid option
 - invalid
-invalid
+INVALID
 
 # %1 = title id
 - title_doesnt_exist
-Title doesn't exist: %1
+TITLE DOESNT EXIST: %1
 
 # %1 = error code
 # %2 = seconds remaining, range: 1-10 inclusive
@@ -165,11 +165,11 @@ else       return "Network connection lost (%1).\nRetrying in %2 second...";
 
 # nowrap, burger (three lines) menu entry
 - about_app
-About
+BOUT
 
 # nowrap, burger (three lines) menu entry
 - help_manual
-Help/Manual
+HALP/MANUAL
 
 # nowrap, burger (three lines) menu entry
 - find_missing_content
