@@ -173,262 +173,262 @@ HALP/MANUAL
 
 # nowrap, burger (three lines) menu entry
 - find_missing_content
-Find missing content
+FIND MISIN CONTENT
 
 # exit menu and sometimes application
 - press_a_exit
-Press UI_GLYPH_A to exit.
+PRES UI_GLYPH_A 2 EXIT.
 
 # can also be translated as fatal error
 - fatal_panic
-A fatal panic has occurred.
+A FATAL PANIC HAS OCCURRD.
 
 # failed to open romfs file, may be translated as "failed to start application"
 - failed_open_seeddb
-Failed to open seeddb.bin.
+FAILD 2 OPEN SEEDDB.BIN.
 
 # %1 = new version, i.e. 1.0.2
 - update_to
-Do you want to update to %1?
+DO U WANTS 2 UPDATE 2 %1?
 
 # nowrap, top screen while searching
 - search_content
-Search for content
+SEARCH 4 CONTENT
 
 # keyboard hint while searching, apparently this has a maximum length
 - search_content_action
-Search for content...
+SEARCH 4 CONTENT...
 
 # used for displaying error codes
 # %1 = result code (0x...)
 - result_code
-Result code: %1
+RESULT CODE: %1
 
 # used for displaying error codes
 # %1 = level name
 - level
-Level: %1
+LEVEL: %1
 
 # used for displaying error codes
 # %1 = summary name
 - summary
-Summary: %1
+SUMMARY: %1
 
 # used for displaying error codes
 # %1 = module name
 - module
-Module: %1
+MODULE: %1
 
 # easter egg, see also: gfx/img/bun.png
 - hs_bunny_found
-Congrats! You found the hShop bunny!
+CONGRATS! U FINDZ TEH HSHOP BUNNEH!
 
 - already_installed_reinstall
-Title already installed. Reinstall?
+TITLE ALREADY INSTALLD. REINSTALL?
 
 - queue_empty
-Queue is empty
-Press UI_GLYPH_A to go back.
-Tip: Press UI_GLYPH_Y to add a title to the queue.
+KEW IZ EMPTY
+PRES UI_GLYF_A 2 GO BAK.
+TIP: PRES UI_GLYF_Y 2 ADD TITLE 2 TEH KEW.
 
 # button, yes/no prompt "no" option
 - cancel
-Cancel
+CANCEL
 
 # button, yes/no prompt "yes" option
 - confirm
-Confirm
+CONFIRM
 
 # proxy settings are checked at startup for obvious errors (user tampering), if bad, it errors with this message
 - invalid_proxy
-Invalid proxy settings
+INVALID PROXY SETTINGS
 
 # nowrap, shown in top when clicking on extended meta
 - more_about_content
-More about this content
+MOAR BOUT DIS CONTENT
 
 # scroll, setting title
 - lumalocalemode
-LumaLocale mode
+LUMALOCALE MODE
 
 # selector, lumalocale mode setting
 - automatic
-automatic
+AUTOMATIC
 
 # selector, lumalocale mode setting
 - manual
-manual
+MANUAL
 
 # selector, lumalocale mode setting
 - disabled
-disabled
+DISABLD
 
 - patching_reboot
-Luma3DS game patching is now enabled.
-The system must be restarted for this change to take effect.
+LUMA3DZ GAME PATCHIN IZ NAO ENABLD.
+TEH SISTEM MUST BE RESTARTD 4 DIS CHANGE 2 TAEK EFFECT.
 
 - reboot_now
-Restart now?
+RESTART NAO?
 
 # %1 = version int "version desc" (i.e. 1.2.0 "cotidie morimur")
 - this_version
-This is 3hs version %1
+DIS AR TEH 3HS VERSHUN %1
 
 # request = API HTTP request, may be translated as "failed to access API"
 - retry_req
-Request failed. Retry?
+REQUEST FAILD. RETRY?
 
 - search_zero_results
-Your search returned no results.
-Press UI_GLYPH_A to go back.
+UR SEARCH RETURND NO RESULTS.
+PRES UI_GLYF_A 2 GO BAK.
 
 # Shown in the "About" burger option
 - credits
-Credits
+CREDITS
 
 # scroll, setting title, i.e. DLC/Updates
 - check_extra
-Search for extra content
+SEARCH 4 EXTRA CONTENT
 
 # request = request for the 3DS to do something, like a command
 - no_req
-No requests made yet
+NO REQUESTS MADE YET
 
 # invalid search query
 - invalid_query
-Invalid query
-Press UI_GLYPH_A to go back.
+INVALID QUERY
+PRES UI_GLYF_A 2 GO BAK.
 
 # %1 = current version
 # %2 = minimum required version
 - min_constraint
-Current 3hs version %1 is lower than the required version %2
+CURRENT 3HS VERSHUN %1 IZ LOWR THAN TEH REQUIRD VERSHUN %2
 
 # scroll, setting title
 - proxy
-Proxy
+PROXY
 
 # used for "no proxy is set", "no default playlist is set"
 - none
-(none)
+(NONE)
 
 # view proxy settings
 - press_a_to_view
-Press UI_GLYPH_A to view.
+PRES UI_GLYF_A 2 VIEW.
 
 # proxy host
 - host
-Host
+HOST
 
 # proxy port
 - port
-Port
+PORT
 
 # proxy username
 - username
-Username
+USERNAYM
 
 # proxy password
 - password
-Password
+PASWORD
 
 # clear all proxy field
 - clear
-Clear
+CLEAR
 
 # setting description
 - progbar_screen_desc
-Select the position of the progress bar.
+SELECT TEH POSISHUN OV TEH PROGRES BAR.
 
 # setting description, unused
 - light_mode_desc
-Enable/disable light mode. This will change the way most UI elements look.
+ENABLE/DISABLE LIGHT MODE. DIS WILL CHANGE TEH WAI MOST UI ELEMENTS LOOK.
 
 # setting description
 - resume_dl_desc
-Resume downloads after a network interruption.
+RESUME DOWNLOADZ AFTR NETWORK INTERRUPSHUN.
 
 # setting description
 - load_space_desc
-Toggle the free space indicator.
+TOGGLE TEH FREE SPACE INDICATOR.
 
 # setting description
 - show_battery_desc
-Toggle the battery level indicator.
+TOGGLE TEH BATTERY LEVEL INDICATOR.
 
 # setting description
 #  you can append something like "in <your country> <your time format> is used most often", that is, if your language is predominantly spoken in one country and there exists a consensus there
 - time_format_desc
-Select the time format.
+SELECT TEH TIEM FORMAT.
 
 # setting description
 - language_desc
-Set the language for 3hs. The application must be restarted for the selected language to take effect.
+SET TEH LANGUAGE 4 3HS. TEH APPLICASHUN MUST BE RESTARTD 4 DA SELECTD LANGUAGE 2 TAEK EFFECT.
 
 # setting description
 - lumalocalemode_desc
-Set the operating mode for locale emulation setup. "Automatic" will automatically configure the language. "Manual" will make 3hs ask you to choose the language after content installation.
+SET TEH OPERATIN MODE 4 LOCALE EMULASHUN SETUP. "AUTOMATIC" WILL AUTOMATICALLY CONFIGURE TEH LANGUAGE. "MANUAL" WILL MAK 3HS ASK U 2 CHOOSE TEH LANGUAGE AFTR CONTENT INSTALLASHUN.
 
 # setting description
 - check_extra_desc
-Search for extra content after installation.
+SEARCH 4 EXTRA CONTENT AFTR INSTALLASHUN.
 
 # setting description
 - proxy_desc
-Configure a proxy server for 3hs. This setting is for advanced users.
+CONFIGURE PROXY SERVR 4 3HS. DIS SETTIN IZ 4 ADVANCD USERS.
 
 # install all from queue
 - install_all
-Install all
+INSTALL ALL
 
 - install_no_base
-The base game is not installed. Continue anyway?
+TEH BASE GAME IZ NOT INSTALLD. CONTINUE ANYWAY?
 
 # setting title
 - warn_no_base
-Warn if a base game is not installed
+WARN IF BASE GAME IZ NOT INSTALLD
 
 # setting description
 - warn_no_base_desc
-Shows a message before installing update or DLC content if the base game is not installed.
+SHOWS MESAGE BEFORE INSTALLIN UPDATE OR DLC CONTENT IF TEH BASE GAME IZ NOT INSTALLD.
 
 # if an error occurs while installing all titles from the queue, this message is displayed before showing each one
 - replaying_errors
-Replaying errors encountered while processing the queue.
+REPLAYIN ERRORS ENCOUNTERD WHILE PROCESIN TEH KEW.
 
 # may also be translated as "manage logs"
 - log
-Logs
+LOGS
 
 - upload_logs
-Upload logs
+UPLOAD LOGS
 
 - clear_logs
-Clear logs
+CLEAR LOGS
 
 # %1 = amount of titles found
 - found_missing
-Found %1 missing title(s)
-Check the queue to install them.
+FINDZ %1 MISIN TITLE(S)
+CHECK TEH KEW 2 INSTALL THEM.
 
 - found_0_missing
-No missing titles were found.
+NO MISIN TITLEZ WUZ FINDZ.
 
 # setting title
 - max_elogs
-Maximum old log files
+MAXIMUM OLD LOG FILEZ
 
 # setting description
 - max_elogs_desc
-Set the number of log files to keep. Possible values are 0 to 255, where 0 keeps no additional log files.
+SET TEH NUMBR OV LOG FILEZ 2 KEEP. POSIBLE VALUEZ R 0 2 255, WER 0 KEEPS NO ADDISHUNAL LOG FILEZ.
 
 # keyboard hint for max old log files, apparently has a maximum amount of characters
 - elogs_hint
-Value between 0 and 255
+VALUE TWEEN 0 AN 255
 
 # %1 = id
 - log_id
-Use this ID to get support:
+USE DIS ID 2 GIT SUPPORT:
 %1
 
 # Nintendo blocks, use official Nintendo translation if available
