@@ -153,15 +153,8 @@ INVALID
 - title_doesnt_exist
 TITLE DOESNT EXIST: %1
 
-# %1 = error code
-# %2 = seconds remaining, range: 1-10 inclusive
 - netcon_lost +code(_, number)
-/* the string is:
-Network connection lost (%1).
-Retrying in %2 second(s)...
-*/
-if(p2 < 2) return "Network connection lost (%1).\nRetrying in %2 seconds...";
-else       return "Network connection lost (%1).\nRetrying in %2 second...";
+"NETWORK CONNECSHUN LOST (%1).\nRETRYIN IN %2 SECONDZ...";
 
 # nowrap, burger (three lines) menu entry
 - about_app
@@ -440,173 +433,173 @@ else       return "%1 (%2 blocks)";
 
 # nowrap, search menu item
 - search_text
-Search by text
+SEARCH BY TEXT
 
 # nowrap, search menu item
 - search_id
-Search by hShop ID
+SEARCH BY HSHOP ID
 
 # nowrap, search menu item
 - search_tid
-Search by Title ID
+SEARCH BY TITLE ID
 
 # invalid title id specified during legacy search
 - invalid_tid
-Invalid title ID
+INVALID TITLE ID
 
 - theme_installer_tid_bad
-Please browse the Themes category manually to look for themes
+PLZ BROWSE TEH THEMEZ KATEGORY MANUALLY 2 LOOK 4 THEMEZ
 
 # this is displayed in transparent letters on the keyboard
 - enter_lgy_query
-Enter a legacy search query
+ENTR LEGACY SEARCH QUERY
 
 - no_other_params_tid
-Cannot specify any other parameters when specifying a title ID
+CANT SPECIFY ANY OTHR PARAMETERS WHEN SPECIFYIN TITLE ID
 
 - both_sd_and_sb
-You must specify a sort method and a sort direction when sorting search results
+U MUST SPECIFY SORT METHOD AN SORT DIRECSHUN WHEN SORTIN SEARCH RESULTS
 
 # i.e. sort by title_id, size, category, subcategory, etc
 - invalid_sb
-Invalid sort method
+INVALID SORT METHOD
 
 # i.e. ascending/descending
 - invalid_sd
-Invalid sort direction
+INVALID SORT DIRECSHUN
 
 # include legacy filter, includes a (sub)category, like a coffee filter
 - invalid_includes
-Invalid include filters
+INVALID INCLUDE FILTERS
 
 # exclude legacy filter, excludes a (sub)category, like a coffee filter
 - invalid_excludes
-Invalid exclude filters
+INVALID EXCLUDE FILTERS
 
 # overlapping filters in legacy search, i.e. include:games exclude:games
 - filter_overlap
-Detected an overlap in the specified search filters
+DETECTD AN OVERLAP IN DA SPECIFID SEARCH FILTERS
 
 # nowrap, search menu item, "legacy" may be translated as "traditional", "old-school", "classic", you name it
 - lgy_search
-Legacy Search
+LEGACY SEARCH
 
 - sure_reset
-Are you sure you want to reset your settings?
+R U SURE U WANTS 2 RESET UR SETTINGS?
 
 # sort direction
 - ascending
-Ascending
+ASCENDIN
 
 # sort direction
 - descending
-Descending
+DESCENDIN
 
 # sort method
 - alphabetical
-Alphabetical
+ALFABETICAL
 
 # sort method
 - downloads
-Downloads
+DOWNLOADZ
 
 # setting title
 - def_sort_meth
-Default sort method
+DEFAULT SORT METHOD
 
 # setting description
 - def_sort_meth_desc
-Specifies the default sort method to use when viewing a list of titles.
+SPECIFIEZ TEH DEFAULT SORT METHOD 2 USE WHEN VIEWIN LIST OV TITLEZ.
 
 # setting title
 - def_sort_dir
-Default sort direction
+DEFAULT SORT DIRECSHUN
 
 # setting description
 - def_sort_dir_desc
-Specifies the default sort direction to use when viewing a list of titles.
+SPECIFIEZ TEH DEFAULT SORT DIRECSHUN 2 USE WHEN VIEWIN LIST OV TITLEZ.
 
 # legacy search content type (see p: documentation on site)
 - invalid_content_type
-Invalid content type
+INVALID CONTENT TYPE
 
 # shown after installation of anything in the themes category, PAGE_THEMES links to the theme installer wiki page
 - theme_installed
-A theme was installed. Please see PAGE_THEMES
+A THEME WUZ INSTALLD. PLZ C PAGE_THEMEZ
 
 # shown after a file forwarder is installed that's not a theme, just here for future proofing
 - file_installed
-A file was installed. These are not shown on the HOME menu
+A FILE WUZ INSTALLD. THEES R NOT SHOWN ON TEH HOME MENU
 
 # setting title
 - allow_led
-Enable LED status indicators
+ENABLE LED STATUS INDICATORS
 
 # setting description
 - allow_led_desc
-This will flash the LED light to inform you of various status changes, such as when a title finishes installing.
+DIS WILL FLASH TEH LED LIGHT 2 INFORM U OV VARIOUS STATUS CHANGEZ, SUCH AS WHEN TITLE FINISHEZ INSTALLIN.
 
 # don't translate "Enable developer UNITINFO", ENVINFO may be translated as configuration, retail may be translated as normal, unit may be translated as variant
 - dev_unitinfo
-According to this console's ENVINFO, this is a development unit.
-3hs will not function correctly on this system.
-In case you have a retail 3DS, ensure "Enable developer UNITINFO" in the Luma3DS configuration is disabled.
+ACCORDIN 2 DIS CONSOLEZ ENVINFO, DIS AR TEH DEVELOPMENT UNIT.
+3HS WILL NOT FUNCSHUN RITE ON DIS SISTEM.
+IN CASE U HAS RETAIL 3DZ, ENSURE "ENABLE DEVELOPR UNITINFO" IN DA LUMA3DZ CONFIGURASHUN IZ DISABLD.
 
 # nowrap, used in for examples language select
 - hint_navigate
-UI_GLYPH_DPAD_CLEAR/UI_GLYPH_CPAD: navigate
+UI_GLYPH_DPAD_CLEAR/UI_GLYPH_CPAD: NAVIGATE
 
 # %1 = theme author
 - made_by
-by %1
+BY %1
 
 # nowrap, burger menu item
 - themes
-Themes
+THEMEZ
 
 # nowrap, burger menu item
 - delete_unused_tickets
-Delete unused tickets
+DELETE UNUSD TICKETS
 
 # asking user if they want to delete unused tickets, %1 = amount of unused tickets that were found
 - found_unused_tickets
-Found %1 unused tickets. Do you want to remove them?
+FINDZ %1 UNUSD TICKETS. DO U WANTS 2 REMOOV THEM?
 
 # informing user that no missing tickets were found
 - found_no_unused_tickets
-No unused tickets were found.
+NO UNUSD TICKETS WUZ FINDZ.
 
 # informing user that the preview image (for themes) that was on the server was unable to be displayed
 - invalid_theme_preview
-Invalid theme preview fetched from server!
+INVALID THEME PREVIEW FETCHD FRUM SERVR!
 
 # hinting the user to press Y to add to queue in extmeta
 - hint_add_queue
-UI_GLYPH_Y: add to queue
+UI_GLYPH_Y: ADD 2 KEW
 
 # hinting the user to press X to preview theme in extmeta if category is themes
 - hint_preview_theme
-UI_GLYPH_X: preview theme
+UI_GLYPH_X: PREVIEW THEME
 
 # used in extmeta for the alternative name, only used in japanese titles for now
 - alt_name
-Alternative name
+ALTERNATIV NAYM
 
 # setting title
 - show_alt
-Show alternative name
+SHOW ALTERNATIV NAYM
 
 # setting description
 - show_alt_desc
-Show alternative names, if available.
+SHOW ALTERNATIV NAMEZ, IF AVAILABLE.
 
 # setting title
 - default_reinst
-Reinstall by default
+REINSTALL BY DEFAULT
 
 # setting description
 - default_reinst_desc
-Reinstall by default; don't explicitily ask to delete an already installed title.
+REINSTALL BY DEFAULT; DOAN EXPLICITILY ASK 2 DELETE AN ALREADY INSTALLD TITLE.
 
 # shown while installing a queue on the other screen
 #  %1 = current game title
@@ -771,7 +764,7 @@ oh hi PREZ UI_GLYPH_L/UI_GLYPH_R to swich moDEz
 
 # Placeholder for empty search bar
 - empty
-(empty)
+(EMPTY)
 
 
 # keyboard hint while filling the search bar for new search
